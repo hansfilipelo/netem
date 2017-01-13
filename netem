@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Check if root
+if (( $(id -u) != 0 )); then
+    echo "The network emulation tool must be run as root."
+    exit 1
+fi
+
+# Handle in-arguments
+for i in "$@"
+do
+    case $i in
+        # Debug mode does not initialize a virtual display
+        -d|--debug)
+            debugMode=true
+            shift # past argument=value
+            ;;
+    esac
+done
+
+# ------------------ RUN 
+
+scriptFolder=$(dirname $0)
+
+# Configure environment
+$scriptFolder/net-setup/net-setup.bash
+$scriptFolder/net-setup/limit-bottleneck.bash
+
+# Run browser
+if [ "$debugMode" != true ]; then
+    python3 $scriptFolder/browser-controller/browser-runner.py
+else
+    python3 $scriptFolder/browser-controller/browser-runner.py --with-gui
+fi
+
+# ----------------- TEARDOWN
+
+# Teardown environment
+$scriptFolder/net-setup/teardown.bash
+
+
