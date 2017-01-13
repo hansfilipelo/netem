@@ -7,6 +7,7 @@ connBandwidth=0.5 # Mbit/s
 bufferMultiplyer=15000
 
 # Calc buffer size as an integer
+# The division by one is to convert float -> integer
 bufferSize=$(echo "($bufferMultiplyer * $meanDelay * 0.001 * $connBandwidth * 1000)/1" | bc)
 
 # Add two namespaces for server and client
@@ -18,7 +19,7 @@ ip netns add client-ns2
 ip link add veth0 type veth peer name veth1
 # switch 1 -> switch 2
 ip link add veth2 type veth peer name veth3
-# switch 2 -> client-1
+# switch 2 -> client-2
 ip link add veth4 type veth peer name veth5
 
 # Create switches
