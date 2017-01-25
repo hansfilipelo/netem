@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+netemFolder=$(realpath $(dirname $0))/..
+
 # Add two namespaces for server and client
 ip netns add server-ns
 ip netns add client-ns2
@@ -39,4 +41,11 @@ ip netns exec server-ns ifconfig veth0 192.168.100.1
 # Set client IP
 ip netns exec client-ns2 ifconfig veth5 192.168.100.2
 ip netns exec client-ns2 ifconfig lo 127.0.0.1
+
+# -----------------------------
+
+# Use the example.com domain for testing. Write this to /etc/hosts
+cp /etc/hosts $netemFolder/hosts.tmp
+echo "# This is for netem testing:" >> /etc/hosts
+echo "192.168.100.1   example.com" >> /etc/hosts
 
