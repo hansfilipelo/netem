@@ -1,16 +1,6 @@
 #!/bin/bash
 set -e
 
-meanDelay=300 # ms
-delayDeviation=200 # ms
-lossRate=0.3 # in percent so 50 -> 50% in EACH direction in EACH direction
-connBandwidth=0.5 # Mbit/s
-bufferMultiplyer=15000
-
-# Calc buffer size as an integer
-# The division by one is to convert float -> integer
-bufferSize=$(echo "($bufferMultiplyer * $meanDelay * 0.001 * $connBandwidth * 1000)/1" | bc)
-
 # Add two namespaces for server and client
 ip netns add server-ns
 ip netns add client-ns2

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+scriptFolder=$(realpath $(dirname $0))
+
+
+# Cleanup virtual network infrastructure
+echo "Tearing down virtual network infrastructure. Will ask for password in order to gain root access."
+sudo $scriptFolder/net-setup/teardown.bash
+
+# Remove temoporary files
+rm -r $scriptFolder/certs
+rm $scriptFolder/netem.nginx.conf
+rm -r $scriptFolder/logs
+rm -r $scriptFolder/webroot
+

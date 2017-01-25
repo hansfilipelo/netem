@@ -1,5 +1,7 @@
 #!/bin/bash
 
+scriptFolder=$(realpath $(dirname $0))
+
 # Check if root
 if (( $(id -u) != 0 )); then
     echo "The network emulation tool must be run as root."
@@ -20,13 +22,9 @@ done
 
 # ------------------ RUN 
 
-scriptFolder=$(dirname $0)
-
-# Configure environment
-$scriptFolder/net-setup/net-setup.bash
-$scriptFolder/net-setup/limit-bottleneck.bash
 
 # Setup a webserver of some sort
+
 
 # Run browser
 if [ "$debugMode" != true ]; then

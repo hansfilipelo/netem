@@ -4,12 +4,29 @@ scriptFolder=$(realpath $(dirname $0))
 certFolder=$scriptFolder/certs
 configFolder=$scriptFolder/config
 
-# Generate a self-signed certificate for encryption
-mkdir -p $certFolder
-openssl req -x509 -newkey rsa:4096 -keyout $certFolder/key.pem -out $certFolder/cert.pem -days 10 -nodes -subj "/C=SE/L=Linkoping/O=Linkoping University/OU=Org/CN=example.com"
-# Generate more secure dhparams
-openssl dhparam -out $certFolder/dhparam.pem 2048
+# Handle in-arguments
+for i in "$@"
+do
+    case $i in
+        # Don't create certs (time consuming)
+        -c|--no-certs)
+            noCerts=true
+            shift # past argument=value
+            ;;
+    esac
+done
 
+# --------------------- Cert generation 
+mkdir -p $certFolder
+if [ "$noCerts" != true ];then
+    # Generate a self-signed certificate for encryption
+    openssl req -x509 -newkey rsa:4096 -keyout $certFolder/key.pem -out $certFolder/cert.pem -days 10 -nodes -subj "/C=SE/L=Linkoping/O=Linkoping University/OU=Org/CN=example.com"
+    
+    # Generate more secure dhparams
+    openssl dhparam -out $certFolder/dhparam.pem 2048
+fi
+
+# --------------------- nginx config
 # Create root folder for data and a log folder
 logFolder=$scriptFolder/logs
 webRoot=$scriptFolder/webroot
@@ -22,7 +39,7 @@ cat > $nginxConf << _EOF_
 
 user www-data;
 worker_processes auto;
-pid /run/nginx.pid;
+pid /tmp/netem.nginx.pid;
 
 events {
 	worker_connections 768;
@@ -48,3 +65,9 @@ http {
     }
 }
 _EOF_
+
+# -------------------- Virtual network setup
+# Setup network namespaces and infrastructure
+echo "Setting up virtual network infrastructure. Will ask for password in order to gain root access."
+sudo $scriptFolder/net-setup/net-setup.bash
+
