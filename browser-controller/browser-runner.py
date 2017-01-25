@@ -38,7 +38,6 @@ time_to_load_page = load_event_end - connect_start
 
 print("Time to fetch URL " + url + ": " + str(time_to_fetch_resources) + "ms. Total page load time: " + str(time_to_load_page) + "ms.")
 
-time.sleep(5)
 driver.quit()
 
 if not "--with-gui" in sys.argv:
