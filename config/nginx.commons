@@ -4,15 +4,3 @@ expires 1h;
 add_header Pragma public;
 add_header Cache-Control "public";
 
-location = /status.png {
-        expires 5m;
-}
-
-location ~* \.(?:ico|css|js|gif|jpe?g|png|tga|woff)$ {
-        expires 30d;
-}
-
-location ~ ~$ {
-        deny all;
-}
-

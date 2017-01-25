@@ -20,11 +20,11 @@ do
     esac
 done
 
-# ------------------ RUN 
+# ------------------ RUN
 
 
 # Setup a webserver of some sort
-
+sudo ip netns exec server-ns nginx -p $(realpath $(dirname .)) -c config/netem.nginx.conf
 
 # Run browser
 if [ "$debugMode" != true ]; then
@@ -34,8 +34,7 @@ else
 fi
 
 # ----------------- TEARDOWN
-
-# Teardown environment
-$scriptFolder/net-setup/teardown.bash
-
+sleep 5
+# Close web server of some sort
+kill -QUIT $( cat /tmp/netem.nginx.pid )
 

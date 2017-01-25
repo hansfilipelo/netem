@@ -1,3 +1,9 @@
+# Cert files, log, webroot
+certs/
+webroot/
+config/neten.nginx.conf
+
+
 # Hidden files
 .*
 !/.gitignore

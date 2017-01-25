@@ -2,14 +2,29 @@
 
 scriptFolder=$(realpath $(dirname $0))
 
+# Handle in-arguments
+for i in "$@"
+do
+    case $i in
+        # Debug mode does not initialize a virtual display
+        -a|--all)
+            allFiles=true
+            shift # past argument=value
+            ;;
+    esac
+done
+
 
 # Cleanup virtual network infrastructure
 echo "Tearing down virtual network infrastructure. Will ask for password in order to gain root access."
 sudo $scriptFolder/net-setup/teardown.bash
 
-# Remove temoporary files
-rm -r $scriptFolder/certs
-rm $scriptFolder/netem.nginx.conf
-rm -r $scriptFolder/logs
-rm -r $scriptFolder/webroot
+if [ "$allFIles" == true ]; then
+    # Remove temoporary files
+    rm -r $scriptFolder/certs
+    rm $scriptFolder/netem.nginx.conf
+    rm -r $scriptFolder/logs
+    rm -r $scriptFolder/webroot
+fi
+
 
