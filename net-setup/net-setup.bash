@@ -38,4 +38,5 @@ ifconfig veth4 up
 ip netns exec server-ns ifconfig veth0 192.168.100.1
 # Set client IP
 ip netns exec client-ns2 ifconfig veth5 192.168.100.2
+ip netns exec client-ns2 ifconfig lo 127.0.0.1
 

@@ -6,7 +6,7 @@ scriptFolder=$(realpath $(dirname $0))
 for i in "$@"
 do
     case $i in
-        # Debug mode does not initialize a virtual display
+        # Cleans up logs, certs, everything.
         -a|--all)
             allFiles=true
             shift # past argument=value
