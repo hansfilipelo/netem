@@ -26,6 +26,8 @@ scriptFolder=$(dirname $0)
 $scriptFolder/net-setup/net-setup.bash
 $scriptFolder/net-setup/limit-bottleneck.bash
 
+# Setup a webserver of some sort
+
 # Run browser
 if [ "$debugMode" != true ]; then
     python3 $scriptFolder/browser-controller/browser-runner.py

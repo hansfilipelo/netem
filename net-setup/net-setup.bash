@@ -16,7 +16,7 @@ ip netns add server-ns
 ip netns add client-ns2
 
 # Add three virtual links with two interfaces each
-# server -> switch 1 
+# server -> switch 1
 ip link add veth0 type veth peer name veth1
 # switch 1 -> switch 2
 ip link add veth2 type veth peer name veth3
