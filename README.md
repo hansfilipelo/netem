@@ -8,3 +8,6 @@ To install requirements on a Debian based system (Debian 8 "Jessie" / Ubuntu 16.
 ```
 sudo apt-get install openvswitch-switch nginx xvfb
 ```
+
+Chromedriver!
+Pipenv!

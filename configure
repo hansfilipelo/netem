@@ -1,8 +1,8 @@
 #!/bin/bash
 
-scriptFolder=$(realpath $(dirname $0))
-certFolder=$scriptFolder/certs
-configFolder=$scriptFolder/config
+netemFolder=$(realpath $(dirname $0))
+certFolder=$netemFolder/certs
+configFolder=$netemFolder/config
 
 # Handle in-arguments
 for i in "$@"
@@ -28,8 +28,8 @@ fi
 
 # --------------------- nginx config
 # Create root folder for data and a log folder
-logFolder=$scriptFolder/logs
-webRoot=$scriptFolder/webroot
+logFolder=$netemFolder/logs
+webRoot=$netemFolder/webroot
 mkdir -p $webRoot
 mkdir -p $logFolder
 
@@ -69,5 +69,5 @@ _EOF_
 # -------------------- Virtual network setup
 # Setup network namespaces and infrastructure
 echo "Setting up virtual network infrastructure. Will ask for password in order to gain root access."
-sudo $scriptFolder/net-setup/net-setup.bash
+sudo $netemFolder/net-setup/net-setup.bash
 

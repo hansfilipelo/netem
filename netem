@@ -1,6 +1,6 @@
 #!/bin/bash
 
-scriptFolder=$(realpath $(dirname $0))
+netemFolder=$(realpath $(dirname $0))
 myUser=$USER
 
 # Handle in-arguments
@@ -23,9 +23,9 @@ sudo ip netns exec server-ns nginx -p $(realpath $(dirname .)) -c config/netem.n
 
 # Run browser
 if [ "$debugMode" != true ]; then
-    sudo ip netns exec client-ns2 su $myUser -c "$scriptFolder/browser-controller/starter.bash"
+    sudo ip netns exec client-ns2 su $myUser -c "$netemFolder/browser-controller/starter.bash"
 else
-    sudo ip netns exec client-ns2 su $myUser -c "$scriptFolder/browser-controller/starter.bash --with-gui"
+    sudo ip netns exec client-ns2 su $myUser -c "$netemFolder/browser-controller/starter.bash --with-gui"
 fi
 
 # ----------------- TEARDOWN
