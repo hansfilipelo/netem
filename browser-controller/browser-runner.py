@@ -10,12 +10,10 @@ from selenium.webdriver.common.keys import Keys
 from selenium import webdriver
 
 
-with_gui = False
-display = ""
 url = "https://example.com"
+display = pyvirtualdisplay.Display(visible=0, size=(1024, 768))
 
 if not "--with-gui" in sys.argv:
-    display = pyvirtualdisplay.Display(visible=0, size=(1024, 768))
     display.start()
 
 driver = webdriver.Chrome()

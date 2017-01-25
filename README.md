@@ -11,3 +11,9 @@ sudo apt-get install openvswitch-switch nginx xvfb
 
 Chromedriver!
 Pipenv!
+
+## Install
+
+```
+git clone --recursive git@github.com:hansfilipelo/netem
+```
