@@ -1,12 +1,7 @@
 #!/bin/bash
 
 scriptFolder=$(realpath $(dirname $0))
-
-# Check if root
-if (( $(id -u) != 0 )); then
-    echo "The network emulation tool must be run as root."
-    exit 1
-fi
+myUser=$USER
 
 # Handle in-arguments
 for i in "$@"
@@ -28,13 +23,12 @@ sudo ip netns exec server-ns nginx -p $(realpath $(dirname .)) -c config/netem.n
 
 # Run browser
 if [ "$debugMode" != true ]; then
-    python3 $scriptFolder/browser-controller/browser-runner.py
+    sudo ip netns exec client-ns2 bash -c "$scriptFolder/browser-controller/starter.bash"
 else
-    python3 $scriptFolder/browser-controller/browser-runner.py --with-gui
+    sudo ip netns exec client-ns2 bash -c "$scriptFolder/browser-controller/starter.bash $myUser --with-gui"
 fi
 
 # ----------------- TEARDOWN
-sleep 5
 # Close web server of some sort
-kill -QUIT $( cat /tmp/netem.nginx.pid )
+sudo kill -QUIT $( cat /tmp/netem.nginx.pid )
 

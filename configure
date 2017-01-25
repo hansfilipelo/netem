@@ -37,7 +37,7 @@ mkdir -p $logFolder
 nginxConf=$configFolder/netem.nginx.conf
 cat > $nginxConf << _EOF_
 
-user www-data;
+user $USER;
 worker_processes auto;
 pid /tmp/netem.nginx.pid;
 
