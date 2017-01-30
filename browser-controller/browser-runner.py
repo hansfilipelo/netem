@@ -11,8 +11,21 @@ from selenium import webdriver
 import datetime
 
 headless = True
+use_quic = False
+use_http2 = False
+
+print(sys.argv)
+
 if "--with-gui" in sys.argv:
     headless = False
+if "--quic" in sys.argv:
+    use_quic = True
+if "--http2" in sys.argv:
+    use_http2 = True
+
+if use_quic == use_http2:
+    print("Choose ONE web protocol to use, HTTP/2 or QUIC.")
+    sys.exit(2)
 
 # File where we can read URLs
 script_dir = os.path.dirname(
@@ -44,8 +57,15 @@ display = pyvirtualdisplay.Display(visible=0, size=(1024, 768))
 if headless:
     display.start()
 
+# Initialize Chromium/Opera
+chromium_options = Options()
+chromium_options.add_argument("--incognito")
+chromium_options.add_argument("--ignore-certificate-errors")
+if use_quic:
+    chromium_options.add_argument("--origin-to-force-quic-on=www.example.com:443")
 driver = webdriver.Chrome()
 
+url_count = 0
 for url in url_list:
     url = url.strip()
     driver.get(base_url + url)
@@ -85,14 +105,17 @@ for url in url_list:
         "   " +\
         str(time_to_fetch_resources) +\
         "   " +\
-        str(time_to_load_page) +
+        str(time_to_load_page) +\
         "\n"
     statistics_file.write(statistics_line)
 
     if headless:
         continue
     else:
+        if url_count > 15:
+            break
         input("Press Enter to continue...")
+        url_count += 1
 
 driver.quit()
 

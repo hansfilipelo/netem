@@ -39,7 +39,7 @@ cat > $nginxConf << _EOF_
 
 user $USER;
 worker_processes auto;
-pid /tmp/netem.nginx.pid;
+pid /tmp/netem.server.pid;
 
 events {
 	worker_connections 768;
@@ -65,6 +65,20 @@ http {
     }
 }
 _EOF_
+
+# --------------------- Caddy config
+caddyFile=$configFolder/netem.Caddyfile
+touch $caddyFile
+
+cat > $caddyFile << _EOF_
+example.com:443
+root $webRoot
+gzip
+log $logFolder/netem.caddy.log
+tls $certFolder/cert.pem $certFolder/key.pem
+
+_EOF_
+
 
 # -------------------- Virtual network setup
 # Setup network namespaces and infrastructure
