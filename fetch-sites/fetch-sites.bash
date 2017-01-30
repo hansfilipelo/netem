@@ -2,38 +2,12 @@
 
 netemFolder=$(realpath $(dirname $0)/..)
 thisFolder=$netemFolder/fetch-sites
+webRoot=$netemFolder/webroot
+urlFile=$netemFolder/config/urls.txt
 
-# Handle in-arguments
-for i in "$@"
-do
-    case $i in
-        # Don't create certs (time consuming)
-        --with-gui)
-            noGui=false
-            shift # past argument=value
-            ;;
-    esac
-done
-
-if [ "$noGui" != false ]; then
-    # Use a virtual display buffer
-    Xvfb :99 &
-    vDispPid=$!
-    export DISPLAY=:99
-    
-    # Save all sites
-    for site in $(cat $netemFolder/config/top500sites.txt); do
-        echo "Fetching $site..."
-        ./automate-save-page-as/save_page_as --browser chromium-browser --destination $netemFolder/webroot $site
-    done
-
-    # Stop virtual display
-    kill $vDispPid
-
-else
-    echo "Fetching $site..."
-    for site in $(cat $netemFolder/config/top500sites.txt); do
-        ./automate-save-page-as/save_page_as --browser chromium-browser --destination $netemFolder/webroot $site
-    done
-fi
-    
+# Save all sites
+echo "Starting!"
+echo "----------------"
+wget --page-requisites --html-extension --convert-links --span-hosts --no-clobber --tries=2 --timeout=10 --directory-prefix=$webRoot --random-wait --wait 1 --input-file=$urlFile
+echo "----------------"
+echo ""
