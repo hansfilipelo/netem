@@ -64,7 +64,6 @@ if use_quic:
     chromium_options.add_argument("--enable-quic")
 driver = webdriver.Chrome(chrome_options=chromium_options)
 
-url_count = 0
 for url in url_list:
     url = url.strip()
     driver.get(base_url + url)
@@ -111,10 +110,7 @@ for url in url_list:
     if headless:
         continue
     else:
-        if url_count > 15:
-            break
         input("Press Enter to continue...")
-        url_count += 1
 
 driver.quit()
 
