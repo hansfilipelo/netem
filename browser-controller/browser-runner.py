@@ -14,8 +14,6 @@ headless = True
 use_quic = False
 use_http2 = False
 
-print(sys.argv)
-
 if "--with-gui" in sys.argv:
     headless = False
 if "--quic" in sys.argv:
@@ -62,7 +60,7 @@ chromium_options = Options()
 chromium_options.add_argument("--incognito")
 chromium_options.add_argument("--ignore-certificate-errors")
 if use_quic:
-    chromium_options.add_argument("--origin-to-force-quic-on=www.example.com:443")
+    chromium_options.add_argument("--origin-to-force-quic-on=" + base_url)
 driver = webdriver.Chrome()
 
 url_count = 0
