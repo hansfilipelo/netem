@@ -13,17 +13,17 @@ import datetime
 
 headless = True
 use_quic = False
-use_http2 = False
+use_http = False
 
 if "--with-gui" in sys.argv:
     headless = False
 if "--quic" in sys.argv:
     use_quic = True
-if "--http2" in sys.argv:
-    use_http2 = True
+if "--http1" in sys.argv or "--http2" in sys.argv:
+    use_http = True
 
-if use_quic == use_http2:
-    print("Choose ONE web protocol to use, HTTP/2 or QUIC.")
+if use_quic == use_http:
+    print("Choose ONE web protocol to use, HTTP/2, HTTP/1.1 or QUIC.")
     sys.exit(2)
 
 # File where we can read URLs

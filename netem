@@ -46,6 +46,10 @@ do
             webProtocol="--http2"
             shift
             ;;
+        -h1|--http1)
+            webProtocol="--http1"
+            shift
+            ;;
     esac
 done
 
@@ -57,11 +61,13 @@ fi
 
 # Setup a webserver of some sort
 if [ "$webProtocol" = "--http2" ]; then
-    sudo ip netns exec server-ns nginx -p $(realpath $(dirname .)) -c config/netem.nginx.conf
+    sudo ip netns exec server-ns caddy -conf="$netemFolder/config/netem.Caddyfile" -pidfile="$pidFile" &
 elif [ "$webProtocol" = "--quic" ]; then
     sudo ip netns exec server-ns caddy -quic -conf="$netemFolder/config/netem.Caddyfile" -pidfile="$pidFile" &
+elif [ $webProtocol = "--http1" ]; then
+    sudo ip netns exec server-ns caddy -http2=false -conf="$netemFolder/config/netem.Caddyfile" -pidfile="$pidFile" &
 else
-    printHelp $0 "No protocol chosen! Please choose at least one of the protocols QUIC, HTTP2 or HTTP."
+    printHelp $0 "No protocol chosen! Please choose at least one of the protocols QUIC, HTTP2 or HTTP1."
 fi
 
 # Run browser
