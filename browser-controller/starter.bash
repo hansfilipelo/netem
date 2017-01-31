@@ -11,9 +11,9 @@ netemFolder=$(realpath $(dirname $0))/..
 source $netemFolder/.venv/bin/activate
 
 if [ "$useGui" != true ]; then
-    python3 $netemFolder/browser-controller/browser-runner.py
+    python3 $netemFolder/browser-controller/browser-runner.py "$@"
 else
-    python3 $netemFolder/browser-controller/browser-runner.py --with-gui
+    python3 $netemFolder/browser-controller/browser-runner.py "$@"
 fi
 
 # Deactivate virtualenv

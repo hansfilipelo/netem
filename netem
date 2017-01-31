@@ -1,7 +1,33 @@
 #!/bin/bash
 
+function printHelp {
+    if [ -n "$2" ]; then
+        echo "ERROR: $2"
+        echo ""
+    fi
+    echo 
+    echo "Usage:"
+    echo "  $1 [-q|--quic] [-h2|--http2] [-d|--debug]"
+    echo ""
+    echo "-d|--debug"
+    echo "      Run browser on primary display. Default is to initialize virtual display."
+    echo ""
+    echo "-h2|--http2"
+    echo "      Use a web server serving pages using HTTP2."
+    echo ""
+    echo "-q|--quic"
+    echo "      Use a web server serving pages using QUIC."
+    exit 1
+}
+
 netemFolder=$(realpath $(dirname $0))
 myUser=$USER
+
+pidFile="/tmp/netem.server.pid"
+sudo touch $pidFile
+
+webProtocol=false
+debugMode=false
 
 # Handle in-arguments
 for i in "$@"
@@ -12,23 +38,46 @@ do
             debugMode=true
             shift # past argument=value
             ;;
+        -q|--quic)
+            webProtocol="--quic"
+            shift
+            ;;
+        -h2|--http2)
+            webProtocol="--http2"
+            shift
+            ;;
+        -h1|--http1)
+            webProtocol="--http1"
+            shift
+            ;;
     esac
 done
 
+if [ $webProtocol = false ]; then
+    printHelp $0 "No protocol chosen! Please choose at least one of the protocols QUIC, HTTP2 or HTTP."
+fi
+
 # ------------------ RUN
 
-
 # Setup a webserver of some sort
-sudo ip netns exec server-ns nginx -p $(realpath $(dirname .)) -c config/netem.nginx.conf
+if [ "$webProtocol" = "--http2" ]; then
+    sudo ip netns exec server-ns caddy -conf="$netemFolder/config/netem.Caddyfile" -pidfile="$pidFile" &
+elif [ "$webProtocol" = "--quic" ]; then
+    sudo ip netns exec server-ns caddy -quic -conf="$netemFolder/config/netem.Caddyfile" -pidfile="$pidFile" &
+elif [ $webProtocol = "--http1" ]; then
+    sudo ip netns exec server-ns caddy -http2=false -conf="$netemFolder/config/netem.Caddyfile" -pidfile="$pidFile" &
+else
+    printHelp $0 "No protocol chosen! Please choose at least one of the protocols QUIC, HTTP2 or HTTP1."
+fi
 
 # Run browser
 if [ "$debugMode" != true ]; then
-    sudo ip netns exec client-ns2 su $myUser -c "$netemFolder/browser-controller/starter.bash"
+    sudo ip netns exec client-ns2 su $myUser -c "$netemFolder/browser-controller/starter.bash $webProtocol"
 else
-    sudo ip netns exec client-ns2 su $myUser -c "$netemFolder/browser-controller/starter.bash --with-gui"
+    sudo ip netns exec client-ns2 su $myUser -c "$netemFolder/browser-controller/starter.bash --with-gui $webProtocol"
 fi
 
 # ----------------- TEARDOWN
 # Close web server of some sort
-sudo kill -QUIT $( cat /tmp/netem.nginx.pid )
+sudo kill -QUIT $( cat /tmp/netem.server.pid )
 

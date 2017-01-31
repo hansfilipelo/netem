@@ -1,29 +1,99 @@
 #!/bin/bash
 
+
+function printHelp {
+	if [ -n "$2" ]; then
+		echo "ERROR: $2"
+		echo ""
+	fi
+	echo
+	echo "Usage:"
+	echo "  $1 [--gen-certs] [--hostname] [--key-file=path/to/key/file] [--cert-file=path/to/cert/file]"
+	echo ""
+	echo "--gen-certs"
+	echo "      Generate self-signed certificates. These does NOT work with QUIC"
+	echo ""
+	echo "--cert-file="
+	echo "		Use this certificate file. This is fullchain[1-N].pem from certbot/letsencrypt. "
+	echo ""
+	echo "--key-file="
+	echo "		Use this private key file. This is privkey[1-N].pem from certbot/letsencrypt. "
+	echo ""
+	echo "--hostname="
+	echo "		Hostname for which certificates are valid."
+	exit 1
+}
+
+
 netemFolder=$(realpath $(dirname $0))
 certFolder=$netemFolder/certs
 configFolder=$netemFolder/config
+genCerts=false
+certificateFile=false
+keyFile=false
+noDhparam=false
 
-# Handle in-arguments
-for i in "$@"
+while [[ $# -gt 0 ]] && [[ ."$1" = .--* ]] ;
 do
-    case $i in
-        # Don't create certs (time consuming)
-        -c|--no-certs)
-            noCerts=true
-            shift # past argument=value
+    opt="$1";
+    shift;              #expose next argument
+    case "$opt" in
+        "--" ) break 2;;
+        "gen-certs")
+            genCerts=true
             ;;
+        "--cert-file="*)
+            certificateFile="${opt#*=}"
+            ;;
+        "--key-file="*)
+            keyFile="${opt#*=}"
+            ;;
+		"--hostname="*)
+            hostname="${opt#*=}"
+			;;
+		"--no-dhparam")
+            noDhparam=true
+			;;
+        *)
+			printHelp $0
+			;;
     esac
 done
 
-# --------------------- Cert generation 
+
+if [ -z "$hostname" ]; then
+	printHelp $0 "You must specify hostname to use for transmissions!"
+fi
+
+if [ "$genCerts" = false ] && ( [ "$certificateFile" = false ] || [ "$keyFile" = false ] ) ; then
+	printHelp $0 "You must either specify certificates or generate certs!"
+fi
+
+if [ "$genCerts" = true ] && ( [ "$certificateFile" = true ] || [ "$keyFile" = true ] ) ; then
+	printHelp $0 "You can't both generate certs and use your own!"
+fi
+
+# Set hostname for runner
+hostnameFile=$netemFolder/browser-controller/hostname.py
+touch $hostnameFile
+echo -n 'hostname = ' > $hostnameFile
+echo -n \' >> $hostnameFile
+echo -n $hostname >> $hostnameFile
+echo \' >> $hostnameFile
+
+# --------------------- Cert generation
 mkdir -p $certFolder
-if [ "$noCerts" != true ];then
+if [ "$genCerts" = true ];then
     # Generate a self-signed certificate for encryption
-    openssl req -x509 -newkey rsa:4096 -keyout $certFolder/key.pem -out $certFolder/cert.pem -days 10 -nodes -subj "/C=SE/L=Linkoping/O=Linkoping University/OU=Org/CN=example.com"
-    
-    # Generate more secure dhparams
-    openssl dhparam -out $certFolder/dhparam.pem 2048
+    openssl req -x509 -newkey rsa:4096 -keyout $certFolder/key.pem -out $certFolder/cert.pem -days 10 -nodes -subj "/C=SE/L=Linkoping/O=Linkoping University/OU=Org/CN=com"
+
+else
+	cp $certificateFile $netemFolder/certs/cert.pem
+	cp $keyFile $netemFolder/certs/key.pem
+fi
+if [ "$noDhparam" = false ]; then
+	# Generate more secure dhparams, beacuse why not
+	openssl dhparam -out $certFolder/dhparam.pem 2048
 fi
 
 # --------------------- nginx config
@@ -33,41 +103,26 @@ webRoot=$netemFolder/webroot
 mkdir -p $webRoot
 mkdir -p $logFolder
 
-# Create an nginx conf for HTTP and HTTP/2 
-nginxConf=$configFolder/netem.nginx.conf
-cat > $nginxConf << _EOF_
+# --------------------- Caddy config
+caddyFile=$configFolder/netem.Caddyfile
+touch $caddyFile
 
-user $USER;
-worker_processes auto;
-pid /tmp/netem.nginx.pid;
+cat > $caddyFile << _EOF_
+$hostname:443
+root $webRoot
+gzip
+log $logFolder/caddy.access.log
+errors $logFolder/caddy.error.log
 
-events {
-	worker_connections 768;
-	# multi_accept on;
+tls $certFolder/cert.pem $certFolder/key.pem {
+	protocols tls1.2 tls1.2
 }
 
-http {
-    server {
-        listen 443;
-        server_name example.com www.example.com;
-        
-        ssl_certificate $certFolder/cert.pem;
-        ssl_certificate_key $certFolder/key.pem;
-        ssl_dhparam $certFolder/dhparam.pem;
-    
-        root $webRoot;
-    
-        error_log $logFolder/nginx.error.log;
-        access_log $logFolder/nginx.access.log;
-    
-        include $configFolder/tls.conf;
-        include $configFolder/nginx.commons;
-    }
-}
 _EOF_
+
 
 # -------------------- Virtual network setup
 # Setup network namespaces and infrastructure
 echo "Setting up virtual network infrastructure. Will ask for password in order to gain root access."
-sudo $netemFolder/net-setup/net-setup.bash
+sudo $netemFolder/net-setup/net-setup.bash $hostname
 
