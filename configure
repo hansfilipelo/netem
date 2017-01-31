@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e
 
 function printHelp {
 	if [ -n "$2" ]; then

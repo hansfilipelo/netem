@@ -19,13 +19,11 @@ done
 echo "Tearing down virtual network infrastructure. Will ask for password in order to gain root access."
 sudo $scriptFolder/net-setup/teardown.bash
 
-if [ "$allFIles" == true ]; then
+if [ "$allFiles" == true ]; then
     # Remove temoporary files
-    rm -r $scriptFolder/certs
-    rm $scriptFolder/netem.nginx.conf
-    rm -r $scriptFolder/logs
-    rm -r $scriptFolder/webroot
-    rm $scriptFolder/browser-controller/hostname.py
+    rm -rf $scriptFolder/certs
+    rm -f $scriptFolder/config/netem.Caddyfile
+    rm -f $scriptFolder/browser-controller/hostname.py
 fi
 
 
