@@ -2,7 +2,11 @@
 certs/
 webroot/
 config/neten.nginx.conf
-
+logs/
+browser-controller/hostname.py
+Pipfile.lock
+config/netem.Caddyfile
+hosts.tmp
 
 # Hidden files
 .*

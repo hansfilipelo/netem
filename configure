@@ -103,39 +103,6 @@ webRoot=$netemFolder/webroot
 mkdir -p $webRoot
 mkdir -p $logFolder
 
-# Create an nginx conf for HTTP and HTTP/2
-nginxConf=$configFolder/netem.nginx.conf
-cat > $nginxConf << _EOF_
-
-user $USER;
-worker_processes auto;
-pid /tmp/netem.server.pid;
-
-events {
-	worker_connections 768;
-	# multi_accept on;
-}
-
-http {
-    server {
-        listen 443;
-        server_name com $hostname;
-
-        ssl_certificate $certFolder/cert.pem;
-        ssl_certificate_key $certFolder/key.pem;
-        ssl_dhparam $certFolder/dhparam.pem;
-
-        root $webRoot;
-
-        error_log $logFolder/nginx.error.log;
-        access_log $logFolder/nginx.access.log;
-
-        include $configFolder/tls.conf;
-        include $configFolder/nginx.commons;
-    }
-}
-_EOF_
-
 # --------------------- Caddy config
 caddyFile=$configFolder/netem.Caddyfile
 touch $caddyFile
@@ -144,8 +111,12 @@ cat > $caddyFile << _EOF_
 $hostname:443
 root $webRoot
 gzip
-log $logFolder/netem.caddy.log
-tls $certFolder/cert.pem $certFolder/key.pem
+log $logFolder/caddy.access.log
+errors $logFolder/caddy.error.log
+
+tls $certFolder/cert.pem $certFolder/key.pem {
+	protocols tls1.2 tls1.2
+}
 
 _EOF_
 
