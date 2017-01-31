@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from hostname import *
 import sys
 import os
 import time
@@ -36,7 +37,7 @@ url_file = open(script_dir +
                 os.path.sep +
                 "urls.txt", "r")
 url_list = url_file.readlines()
-base_url = "https://example.com/"
+base_url = "https://" + hostname + "/"
 
 # Create log file for statistics
 now = datetime.datetime.today().isoformat()
@@ -57,11 +58,11 @@ if headless:
 
 # Initialize Chromium/Opera
 chromium_options = Options()
-chromium_options.add_argument("--incognito")
 chromium_options.add_argument("--ignore-certificate-errors")
 if use_quic:
     chromium_options.add_argument("--origin-to-force-quic-on=" + base_url)
-driver = webdriver.Chrome()
+    chromium_options.add_argument("--enable-quic")
+driver = webdriver.Chrome(chrome_options=chromium_options)
 
 url_count = 0
 for url in url_list:

@@ -25,6 +25,7 @@ if [ "$allFIles" == true ]; then
     rm $scriptFolder/netem.nginx.conf
     rm -r $scriptFolder/logs
     rm -r $scriptFolder/webroot
+    rm $scriptFolder/browser-controller/hostname.py
 fi
 
 
