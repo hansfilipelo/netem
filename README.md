@@ -18,7 +18,7 @@ pip3 install pipenv
 
 **Chromedriver and Caddy is requirements that must be installed separately**
 
-You can get Caddy from https://caddyserver.com/ and Chromedriver from https://sites.google.com/a/chromium.org/chromedriver/downloads. Put them in path (recommended location is /usr/local/bin).
+You can get Caddy by running `go get github.com/mholt/caddy/caddy` using Go >=1.7. You can get Chromedriver from https://sites.google.com/a/chromium.org/chromedriver/downloads. Put Chromedriver in path (recommended location is /usr/local/bin).
 
 ## Clone
 
