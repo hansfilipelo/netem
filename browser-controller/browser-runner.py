@@ -37,7 +37,7 @@ url_file = open(script_dir +
                 os.path.sep +
                 "urls.txt", "r")
 url_list = url_file.readlines()
-base_url = "https://" + hostname + "/"
+base_url = hostname
 
 # Create log file for statistics
 now = datetime.datetime.today().isoformat()
@@ -59,14 +59,15 @@ if headless:
 # Initialize Chromium/Opera
 chromium_options = Options()
 chromium_options.add_argument("--ignore-certificate-errors")
+chromium_options.add_argument('--disable-application-cache')
 if use_quic:
-    chromium_options.add_argument("--origin-to-force-quic-on=" + base_url)
+    chromium_options.add_argument("--origin-to-force-quic-on=" + base_url + ":443")
     chromium_options.add_argument("--enable-quic")
 driver = webdriver.Chrome(chrome_options=chromium_options)
 
 for url in url_list:
     url = url.strip()
-    driver.get(base_url + url)
+    driver.get("https://" + base_url + "/" + url)
 
     # Saving some important statistics for use.
     # See
@@ -110,8 +111,8 @@ for url in url_list:
     if headless:
         continue
     else:
-	    continue
-        #input("Press Enter to continue...")
+	    #continue
+        input("Press Enter to continue...")
 
 driver.quit()
 

@@ -4,19 +4,39 @@ function printHelp {
     if [ -n "$2" ]; then
         echo "ERROR: $2"
         echo ""
+    else
+        echo "netem - Web protocol analyzer which simulates a bottleneck link of your choise."
     fi
     echo 
     echo "Usage:"
-    echo "  $1 [-q|--quic] [-h2|--http2] [-d|--debug]"
+    echo "  $1 [-q|--quic|-h2|--http2|-h1|--http1] [-d|--debug]"
     echo ""
     echo "-d|--debug"
     echo "      Run browser on primary display. Default is to initialize virtual display."
     echo ""
     echo "-h2|--http2"
-    echo "      Use a web server serving pages using HTTP2."
+    echo "      Use a web server serving pages using HTTP/2."
+    echo ""
+    echo "-h1|--http1"
+    echo "      Use a web server serving pages using HTTP/1.1."
     echo ""
     echo "-q|--quic"
     echo "      Use a web server serving pages using QUIC."
+    echo ""
+    echo "--loss-rate-dl= / --loss-rate-ul="
+    echo "      Specify the loss rate on the down-link/up-link given in percent. 1-3% on down-link in rare cases but mostly below 1% by an order of magnitude. Up-link rarely sees loss in cellular networks. "
+    echo ""
+    echo "--delay-dl= / --delay-ul"
+    echo "      Specify the delay in ms on the down-link/up-link. "
+    echo ""
+    echo "--delay-deviation-dl= / --delay-deviation-ul"
+    echo "      Specify the standard deviation of the delay ms on the down-link/up-link. "
+    echo ""
+    echo "--loss-rate-dl= / --loss-rate-ul"
+    echo "      Specify the tandard deviation of the delay ms on the down-link/up-link. "
+    echo ""
+    echo "--bandwidth-dl= / --bandwidth-ul"
+    echo "      Specify the tandard deviation of the delay ms on the down-link/up-link. "
     exit 1
 }
 
@@ -24,16 +44,13 @@ netemFolder=$(realpath $(dirname $0))
 myUser=$USER
 caddy=$(which caddy)
 
-pidFile="/tmp/netem.server.pid"
-sudo touch $pidFile
 
-webProtocol=false
 debugMode=false
 
 # Handle in-arguments
-for i in "$@"
+for argument in "$@"
 do
-    case $i in
+    case $argument in
         # Debug mode does not initialize a virtual display
         -d|--debug)
             debugMode=true
@@ -51,15 +68,53 @@ do
             webProtocol="--http1"
             shift
             ;;
+        "--loss-rate-dl="*)
+            lossRateDown="${argument#*=}"
+            shift
+            ;;
+        "--delay-dl="*)
+            meanDelayDown="${argument#*=}"
+            shift
+            ;;
+        "--delay-deviation-dl="*)
+            delayDeviationDown="${argument#*=}"
+            shift
+            ;;
+        "--bandwidth-dl="*)
+            bandwidthDown="${argument#*=}"
+            shift
+            ;;
+        "--loss-rate-ul="*)
+            lossRateUp="${argument#*=}"
+            shift
+            ;;
+        "--delay-ul="*)
+            meanDelayUp="${argument#*=}"
+            shift
+            ;;
+        "--delay-deviation-ul="*)
+            delayDeviationUp="${argument#*=}"
+            shift
+            ;;
+        "--bandwidth-ul="*)
+            bandwidthDownUp="${argument#*=}"
+            shift
+            ;;
+        *)
+            printHelp $0
+            shift
+            ;;
     esac
 done
 
-if [ $webProtocol = false ]; then
+
+if [ -z "$webProtocol" ]; then
     printHelp $0 "No protocol chosen! Please choose at least one of the protocols QUIC, HTTP2 or HTTP."
 fi
 
 # ------------------ RUN
-
+pidFile="/tmp/netem.server.pid"
+sudo touch $pidFile
 # Setup a webserver of some sort
 if [ "$webProtocol" = "--http2" ]; then
     sudo ip netns exec server-ns $caddy -conf="$netemFolder/config/netem.Caddyfile" -pidfile="$pidFile" &

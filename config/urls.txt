@@ -1,6 +1,8 @@
+google.com
+facebook.com
+360.cn
 1688.com
 2ch.net
-360.cn
 39.net
 4dsply.com
 4shared.com
@@ -81,7 +83,6 @@ etsy.com
 ettoday.net
 evernote.com
 exoclick.com
-facebook.com
 fc2.com
 filehippo.com
 files.wordpress.com
@@ -102,7 +103,6 @@ github.io
 globo.com
 gmw.cn
 gmx.net
-google.com
 goo.ne.jp
 groupon.com
 haber7.com
