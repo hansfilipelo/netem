@@ -5,7 +5,7 @@ Source code for master-thesis
 
 **Certificate**
 
-In order to run the tests with QUIC, you need a valid server certificate and private key. This is due to how Chromium handles QUIC security.
+In order to run the tests with QUIC, you need a valid server certificate and private key for a given domain. This is due to how Chromium handles QUIC security.
 
 **Most requirements**
 
@@ -27,10 +27,21 @@ git clone --recursive git@github.com:hansfilipelo/netem
 cd netem
 ```
 
+## Websites to load
+
+There's an included script (`fetch-sites/fetch-sites.bash`) that populates the folder "webroot" with pages from Alexa top 500 that loads somewhat okay as static sites. Either run this or put your own site in:
+
+```
+"this-folder"/webroot/url
+```
+
+Then replace the contents of the file `config/urls.txt` with your own url. For each entry in `urls.txt` netem will load `https://MY_HOSTNAME/url` from the web server.
+
 ## Setup
 
 ```
 pipenv install
+# Remember that you need a VALID certificate for the domain
 ./configure --key-file=path/to/my/key --cert-file=path/to/my/cert --hostname=MY_HOSTNAME
 ```
 
