@@ -9,7 +9,7 @@ function printHelp {
     fi
     echo 
     echo "Usage:"
-    echo "  $1 [-q|--quic|-h2|--http2|-h1|--http1] [-d|--debug]"
+    echo "  $1 [-q|--quic|-h2|--http2|-h1|--http1]"
     echo ""
     echo "-d|--debug"
     echo "      Run browser on primary display. Default is to initialize virtual display."
@@ -47,6 +47,8 @@ caddy=$(which caddy)
 
 debugMode=false
 
+# Set extblog extension in bash in order for case-switch to work (disabled when executing script)
+shopt -s extglob
 # Handle in-arguments
 for argument in "$@"
 do
@@ -68,41 +70,20 @@ do
             webProtocol="--http1"
             shift
             ;;
-        "--loss-rate-dl="*)
-            lossRateDown="${argument#*=}"
+        --loss-rate-@(dl|ul)=*)
             shift
             ;;
-        "--delay-dl="*)
-            meanDelayDown="${argument#*=}"
+        --delay-@(dl|ul)=*)
             shift
             ;;
-        "--delay-deviation-dl="*)
-            delayDeviationDown="${argument#*=}"
+        --delay-deviation-@(dl|ul)=*)
             shift
             ;;
-        "--bandwidth-dl="*)
-            bandwidthDown="${argument#*=}"
-            shift
-            ;;
-        "--loss-rate-ul="*)
-            lossRateUp="${argument#*=}"
-            shift
-            ;;
-        "--delay-ul="*)
-            meanDelayUp="${argument#*=}"
-            shift
-            ;;
-        "--delay-deviation-ul="*)
-            delayDeviationUp="${argument#*=}"
-            shift
-            ;;
-        "--bandwidth-ul="*)
-            bandwidthDownUp="${argument#*=}"
+        --bandwidth-@(dl|ul)=*)
             shift
             ;;
         *)
-            printHelp $0
-            shift
+            printHelp $0 "Invalid argument: $argument"
             ;;
     esac
 done
@@ -111,6 +92,9 @@ done
 if [ -z "$webProtocol" ]; then
     printHelp $0 "No protocol chosen! Please choose at least one of the protocols QUIC, HTTP2 or HTTP."
 fi
+
+# Setup link limits
+sudo $netemFolder/net-setup/limit-bottleneck.bash
 
 # ------------------ RUN
 pidFile="/tmp/netem.server.pid"
