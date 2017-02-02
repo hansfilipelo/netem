@@ -12,7 +12,7 @@ In order to run the tests with QUIC, you need a valid server certificate and pri
 To install some requirements on a Debian based system (Debian 8 "Jessie" / Ubuntu 16.04 or later):
 
 ```
-sudo apt-get install openvswitch-switch xvfb python3-dev python3-virtualenv python3-pip virtualenv
+sudo apt-get install openvswitch-switch xvfb python3-dev python3-virtualenv python3-pip virtualenv ethtool
 pip3 install pipenv
 ```
 

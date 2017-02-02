@@ -44,6 +44,7 @@ netemFolder=$(realpath $(dirname $0))
 myUser=$USER
 caddy=$(which caddy)
 
+limitArgs=""
 
 debugMode=false
 
@@ -71,15 +72,19 @@ do
             shift
             ;;
         --loss-rate-@(dl|ul)=*)
+            limitArgs="$limitArgs $argument"
             shift
             ;;
         --delay-@(dl|ul)=*)
+            limitArgs="$limitArgs $argument"
             shift
             ;;
         --delay-deviation-@(dl|ul)=*)
+            limitArgs="$limitArgs $argument"
             shift
             ;;
         --bandwidth-@(dl|ul)=*)
+            limitArgs="$limitArgs $argument"
             shift
             ;;
         *)
@@ -94,7 +99,11 @@ if [ -z "$webProtocol" ]; then
 fi
 
 # Setup link limits
-sudo $netemFolder/net-setup/limit-bottleneck.bash
+sudo $netemFolder/net-setup/limit-bottleneck.bash $limitArgs
+if [ $? != 0 ]; then
+    echo "ERROR: Failed to limit network links!"
+    exit 3
+fi
 
 # ------------------ RUN
 pidFile="/tmp/netem.server.pid"

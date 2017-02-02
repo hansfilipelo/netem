@@ -1,61 +1,64 @@
-!/bin/bash
-set -e
+#!/bin/bash
+# set -e
 
 # Handle in-arguments -------------
-
-for argument in "$@"
+for inArg in "$@"
 do
-    case $argument in
+    case $inArg in
         "--loss-rate-dl="*)
-            lossRateDown="${argument#*=}"
+            lossRateDown="${inArg#*=}"
             shift
             ;;
         "--delay-dl="*)
-            meanDelayDown="${argument#*=}"
+            meanDelayDown="${inArg#*=}"
             shift
             ;;
         "--delay-deviation-dl="*)
-            delayDeviationDown="${argument#*=}"
+            delayDeviationDown="${inArg#*=}"
             shift
             ;;
         "--bandwidth-dl="*)
-            bandwidthDown="${argument#*=}"
+            bandwidthDown="${inArg#*=}"
             shift
             ;;
         "--loss-rate-ul="*)
-            lossRateUp="${argument#*=}"
+            lossRateUp="${inArg#*=}"
             shift
             ;;
         "--delay-ul="*)
-            meanDelayUp="${argument#*=}"
+            meanDelayUp="${inArg#*=}"
             shift
             ;;
         "--delay-deviation-ul="*)
-            delayDeviationUp="${argument#*=}"
+            delayDeviationUp="${inArg#*=}"
             shift
             ;;
         "--bandwidth-ul="*)
-            bandwidthUp="${argument#*=}"
+            bandwidthUp="${inArg#*=}"
+            shift
+            ;;
+        *)
+            echo "$0 : Invalid argument $inArg."
             shift
             ;;
     esac
 done
 
 # Used for restoring qdiscs
-function restoreQdiscs {
+function restoreQdiscs () {
     for interface in $@; do
-        tc qdisc del dev $interface root
+        tc qdisc replace dev $interface root fq_codel
     done
 }
 
 # Start by restoring qdiscs
-restoreQdiscs veth2 veth3
+restoreQdiscs "veth2" "veth3"
 
 # Buffer size -------------------
 bufferMultiplyer=15000
 # Calc buffer size as an integer
 # The division by 1 is to convert float -> integer
-bufferSize=$(echo "($bufferMultiplyer * $meanDelayDown * 2 * 0.001 * $connBandwidthDown * 1000)/1" | bc)
+bufferSize=$(echo "($bufferMultiplyer * $meanDelayDown * 2 * 0.001 * $bandwidthDown * 1000)/1" | bc)
 
 
 # Setup the qdiscs -----------------------------------------------------
@@ -65,19 +68,19 @@ nrQdiscs=0
 
 # Start with down-link -----------------------------
 # Bandwidth
-if [ $bandwidthDown ]; then
+if [ -n "$bandwidthDown" ]; then
     tc -s qdisc replace dev veth2 root handle 1:0 netem rate "$bandwidthDown"Mbit limit $bufferSize
     nrQdiscs=$(($nrQdiscs + 1))
 fi
 # If we fail - exit!
-if [ $? ]; then
+if [ $? != 0 ]; then
     echo "Failed to setup bandwidth limit on down-link!"
     restoreQdiscs veth2
     exit 12
 fi
 
 # Delay
-if [ $meanDelayDown ] && [ $delayDeviationDown ]; then
+if [ -n "$meanDelayDown" ] && [ -n "$delayDeviationDown" ]; then
     if [ $nrQdiscs = 1 ]; then
         tc -s qdisc add dev veth2 parent 1:0 handle 2: netem delay "$meanDelayDown"ms "$delayDeviationDown"ms distribution normal
     else
@@ -85,21 +88,22 @@ if [ $meanDelayDown ] && [ $delayDeviationDown ]; then
     fi
     nrQdiscs=$(($nrQdiscs + 1))
 
-else if [ $meanDelayDown ]; then
+elif [ -n "$meanDelayDown" ]; then
     if [ $nrQdiscs = 1 ]; then
         tc -s qdisc add dev veth2 parent 1:0 handle 2: netem delay "$meanDelayDown"ms
     else
         tc -s qdisc replace dev veth2 root handle 1:0 netem delay "$meanDelayDown"ms
     fi
     nrQdiscs=$(($nrQdiscs + 1))
-else
+elif [ -n "$delayDeviationDown" ] && [ -z "$meanDelayDown"]; then
     echo "ERROR: You can't set a delay deviation without setting a delay!!"
     restoreQdiscs veth2
     exit 11
 fi
+
 # If we fail - exit!
-if [ $? ]; then
-    echo "Failed to setup delay on down-link!"
+if [ $? != 0 ]; then
+    echo "Failed to setup bandwidth limit on down-link!"
     restoreQdiscs veth2
     exit 12
 fi
@@ -113,22 +117,23 @@ if [ "$lossRateDown" ]; then
     fi
 fi
 # If we fail - exit!
-if [ $? ]; then
+if [ $? != 0 ]; then
     echo "Failed to setup loss on down-link!"
     restoreQdiscs veth2
     exit 12
 fi
 
 # Now do uplink! ---------------------------------------------------------------------
+nrQdiscs=0
 
 # Bandwidth
-if [ $bandwidthDown ]; then
+if [ $bandwidthUp ]; then
     tc -s qdisc replace dev veth3 root handle 1:0 netem rate "$bandwidthUp"Mbit limit $bufferSize
     nrQdiscs=$(($nrQdiscs + 1))
 fi
 # If we fail - exit!
-if [ $? ]; then
-    echo "Failed to setup bandwidth limit on down-link!"
+if [ $? != 0 ]; then
+    echo "Failed to setup bandwidth limit on up-link!"
     restoreQdiscs veth3
     exit 12
 fi
@@ -142,23 +147,19 @@ if [ $meanDelayUp ] && [ $delayDeviationUp ]; then
     fi
     nrQdiscs=$(($nrQdiscs + 1))
 
-else if [ $meanDelayUp ]; then
+elif [ $meanDelayUp ]; then
     if [ $nrQdiscs = 1 ]; then
         tc -s qdisc add dev veth3 parent 1:0 handle 2: netem delay "$meanDelayUp"ms
     else
         tc -s qdisc replace dev veth3 root handle 1:0 netem delay "$meanDelayUp"ms
     fi
     nrQdiscs=$(($nrQdiscs + 1))
-else
-    echo "ERROR: You can't set a delay deviation without setting a delay!!"
+elif [ -n "$delayDeviationUp" ] && [ -z "$meanDelayUp"]; then
+    echo "ERROR: You can't set a delay deviation without setting a delay!"
     restoreQdiscs veth3
     exit 11
-fi
-# If we fail - exit!
-if [ $? ]; then
-    echo "Failed to setup delay on down-link!"
-    restoreQdiscs veth3
-    exit 12
+else
+    continue
 fi
 
 # Loss 
@@ -170,8 +171,8 @@ if [ "$lossRateUp" ]; then
     fi
 fi
 # If we fail - exit!
-if [ $? ]; then
-    echo "Failed to setup loss on down-link!"
+if [ $? != 0 ]; then
+    echo "Failed to setup loss on up-link!"
     restoreQdiscs veth3
     exit 12
 fi
@@ -192,3 +193,4 @@ ethtool --offload veth3 gro off
 ip netns exec client-ns2 ethtool --offload veth5 gso off
 ip netns exec client-ns2 ethtool --offload veth5 tso off
 ip netns exec client-ns2 ethtool --offload veth5 gro off
+
