@@ -111,8 +111,8 @@ for url in url_list:
     if headless:
         continue
     else:
-	    #continue
-        input("Press Enter to continue...")
+        continue
+        #input("Press Enter to continue...")
 
 driver.quit()
 
