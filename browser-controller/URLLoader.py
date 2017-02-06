@@ -19,6 +19,8 @@ class URLLoader(threading.Thread):
         self.url_list = url_list
         self.base_url = base_url
         self.statistics_file = statistics_file
+        self.use_quic = use_quic
+        self.headless = headless
 
         # Initialize Chromium/Opera
         self.chromium_options = selenium.webdriver.chrome.options.Options()
@@ -60,6 +62,7 @@ class URLLoader(threading.Thread):
         self.reset_driver()
 
         for url in self.url_list:
+            url = url.strip()
             tries = 0
             succeeded = True
 
@@ -67,6 +70,8 @@ class URLLoader(threading.Thread):
                 if not succeeded:
                     self.reset_driver()
 
+                if not self.headless:
+                    input("Press enter to continue...")
                 loader = self.load_page("https://" + self.base_url + "/" + url)
                 succeeded = self.wait_for_page_load(loader)
                 results = loader.get_result()
@@ -76,24 +81,26 @@ class URLLoader(threading.Thread):
                     time_to_fetch_resources = results["response_end"] - results["connect_start"]
                     time_to_load_page = results["load_event_end"] - results["connect_start"]
                     statistics_line = str(url) +\
-                        "\t" +\
+                        "   " +\
                         str(time_to_fetch_resources) +\
-                        "\t" +\
+                        "   " +\
                         str(time_to_load_page) +\
                         "\n"
-                    self.statistics_file.write(statistics_line)
+                    with open(self.statistics_file, "a") as log_file:
+                        log_file.write(statistics_line)
                     break
 
                 elif tries < self.max_retries - 1:
                     tries = tries + 1
                 else:
                     statistics_line = str(url) +\
-                        "\t" +\
+                        "   " +\
                         "Inf" +\
-                        "\t" +\
+                        "   " +\
                         "Inf" +\
                         "\n"
-                    self.statistics_file.write(statistics_line)
+                    with open(self.statistics_file, "a") as log_file:
+                        log_file.write(statistics_line)
                     break
 
         self.driver.close()

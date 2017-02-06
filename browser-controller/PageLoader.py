@@ -51,7 +51,10 @@ class PageLoader(threading.Thread):
                 "return window.performance.timing.loadEventEnd")
 
             # And we're done!
-            self.results["load_succeeded"] = True
+            if "this site can’t be reached" in self.driver.page_source.lower():
+                self.results["load_succeeded"] = False
+            else:
+                self.results["load_succeeded"] = True
         except Exception as e:
             self.results["load_succeeded"] = False
             print("Got exception when fetching " + self.url)

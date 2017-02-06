@@ -36,16 +36,16 @@ url_list = url_file.readlines()
 base_url = hostname
 
 # Create log file for statistics
-now = datetime.datetime.today().isoformat()
-statistics_file = open(script_dir +
-                       os.path.sep +
-                       ".." +
-                       os.path.sep +
-                       "logs" +
-                       os.path.sep +
-                       "netem-log-" +
-                       now +
-                       ".txt", "a")
+now = '{0:%Y-%m-%d_%H-%M-%S}'.format(datetime.datetime.today())
+statistics_file = script_dir +\
+    os.path.sep +\
+    ".." +\
+    os.path.sep +\
+    "logs" +\
+    os.path.sep +\
+    "netem-log-" +\
+    now +\
+    ".txt"
 
 # If not debugging, run headless
 display = pyvirtualdisplay.Display(visible=0, size=(1024, 768))
@@ -53,10 +53,10 @@ if headless:
     display.start()
 
 # Spawn controller thread and wait for finish
-myLoader = URLLoader.URLLoader(base_url, url_list, 60, 2, statistics_file, use_quic, headless)
+myLoader = URLLoader.URLLoader(base_url, url_list, 60, 3, statistics_file, use_quic, headless)
 myLoader.start()
 myLoader.join()
 
 # Close virtual display
 if headless:
-    display.stop
+    display.stottt
