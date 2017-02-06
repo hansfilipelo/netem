@@ -58,7 +58,7 @@ class PageLoader(threading.Thread):
         except Exception as e:
             self.results["load_succeeded"] = False
             print("Got exception when fetching " + self.url)
-            print(e)
+            print(type(e).__name__ + str(e))
         self.done.set()
 
     def get_result(self):

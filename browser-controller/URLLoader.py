@@ -38,6 +38,12 @@ class URLLoader(threading.Thread):
         self.setDaemon(True)
 
     def reset_driver(self):
+        if self.driver:
+            try:
+                self.driver.quit()
+            except Exception as e:
+                print("Can't close non-working driver:")
+                print(type(e).__name__ + str(e))
         self.driver = selenium.webdriver.Chrome(chrome_options=self.chromium_options)
         self.driver.implicitly_wait(max(self.timeout - 10, 10))
         # Does not work in S2L,
@@ -93,6 +99,14 @@ class URLLoader(threading.Thread):
 
                 elif tries < self.max_retries - 1:
                     tries = tries + 1
+                    statistics_line = str(url) +\
+                        "   " +\
+                        "Inf" +\
+                        "   " +\
+                        "Inf" +\
+                        "\n"
+                    with open(self.statistics_file, "a") as log_file:
+                        log_file.write(statistics_line)
                 else:
                     statistics_line = str(url) +\
                         "   " +\
