@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 
-from hostname import *
+from hostname import hostname as hostname
 import sys
 import os
-import time
 import pyvirtualdisplay
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.keys import Keys
-from selenium import webdriver
 import datetime
+import URLLoader
 
 headless = True
 use_quic = False
@@ -28,7 +24,7 @@ if use_quic == use_http:
 
 # File where we can read URLs
 script_dir = os.path.dirname(
-        os.path.realpath(__file__))
+    os.path.realpath(__file__))
 url_file = open(script_dir +
                 os.path.sep +
                 ".." +
@@ -51,70 +47,16 @@ statistics_file = open(script_dir +
                        now +
                        ".txt", "a")
 
-
+# If not debugging, run headless
 display = pyvirtualdisplay.Display(visible=0, size=(1024, 768))
 if headless:
     display.start()
 
-# Initialize Chromium/Opera
-chromium_options = Options()
-chromium_options.add_argument("--ignore-certificate-errors")
-chromium_options.add_argument('--disable-application-cache')
-if use_quic:
-    chromium_options.add_argument("--origin-to-force-quic-on=" + base_url + ":443")
-    chromium_options.add_argument("--enable-quic")
-driver = webdriver.Chrome(chrome_options=chromium_options)
+# Spawn controller thread and wait for finish
+myLoader = URLLoader.URLLoader(base_url, url_list, 60, 2, statistics_file, use_quic, headless)
+myLoader.start()
+myLoader.join()
 
-for url in url_list:
-    url = url.strip()
-    driver.get("https://" + base_url + "/" + url)
-
-    # Saving some important statistics for use.
-    # See
-    # http://www.sitepoint.com/profiling-page-loads-with-the-navigation-timing-api/
-
-    # Before connection starts
-    connect_start = driver.execute_script(
-            "return window.performance.timing.connectStart")
-    # Time just after browser receives first byte of response
-    response_start = driver.execute_script(
-            "return window.performance.timing.responseStart")
-    # Time just after browser receives last byte of response
-    response_end = driver.execute_script(
-            "return window.performance.timing.responseEnd")
-    # Time just before dom is set to complete
-    dom_complete = driver.execute_script(
-            "return window.performance.timing.domComplete")
-    # End of page load
-    load_event_end = driver.execute_script(
-            "return window.performance.timing.loadEventEnd")
-
-    time_to_fetch_resources = response_end - connect_start
-    time_to_load_page = load_event_end - connect_start
-
-    # Save some statistics
-    print("Time to fetch URL " +
-          url +
-          ": " +
-          str(time_to_fetch_resources) +
-          "ms. Total page load time: " +
-          str(time_to_load_page) +
-          "ms.")
-    statistics_line = str(url) +\
-        "   " +\
-        str(time_to_fetch_resources) +\
-        "   " +\
-        str(time_to_load_page) +\
-        "\n"
-    statistics_file.write(statistics_line)
-
-    if headless:
-        continue
-    else:
-        continue
-        #input("Press Enter to continue...")
-
-driver.quit()
-
+# Close virtual display
 if headless:
     display.stop
