@@ -8,14 +8,30 @@ import datetime
 import URLLoader
 
 headless = True
+debug = False
 use_quic = False
 use_http = False
 
+web_protocol = sys.argv[1]
+max_retries = sys.argv[2]
+timeout = sys.argv[3]
+
+try:
+    max_retries = int(max_retries)
+    timeout = int(timeout)
+except ValueError as e:
+    print("ERROR: Max retries and timeout must be integers!")
+    print(str(e))
+    sys.exit(14)
+
 if "--with-gui" in sys.argv:
     headless = False
-if "--quic" in sys.argv:
+if "--debug" in sys.argv:
+    debug = True
+    headless = False
+if "--quic" == web_protocol:
     use_quic = True
-if "--http1" in sys.argv or "--http2" in sys.argv:
+if "--http1" == web_protocol or "--http2" in web_protocol:
     use_http = True
 
 if use_quic == use_http:
@@ -53,7 +69,7 @@ if headless:
     display.start()
 
 # Spawn controller thread and wait for finish
-myLoader = URLLoader.URLLoader(base_url, url_list, 60, 3, statistics_file, use_quic, headless)
+myLoader = URLLoader.URLLoader(base_url, url_list, 60, 3, statistics_file, use_quic, headless, debug)
 myLoader.start()
 myLoader.join()
 

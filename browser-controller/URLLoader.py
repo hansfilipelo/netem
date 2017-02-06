@@ -13,7 +13,7 @@ import threading
 
 class URLLoader(threading.Thread):
 
-    def __init__(self, base_url, url_list, timeout, max_retries, statistics_file, use_quic=False, headless=True):
+    def __init__(self, base_url, url_list, timeout, max_retries, statistics_file, use_quic=False, headless=True, debug=False):
         self.max_retries = max_retries
         self.timeout = timeout
         self.url_list = url_list
@@ -21,6 +21,7 @@ class URLLoader(threading.Thread):
         self.statistics_file = statistics_file
         self.use_quic = use_quic
         self.headless = headless
+        self.debug = debug
 
         # Initialize Chromium/Opera
         self.chromium_options = selenium.webdriver.chrome.options.Options()
@@ -70,7 +71,7 @@ class URLLoader(threading.Thread):
                 if not succeeded:
                     self.reset_driver()
 
-                if not self.headless:
+                if self.debug:
                     input("Press enter to continue...")
                 loader = self.load_page("https://" + self.base_url + "/" + url)
                 succeeded = self.wait_for_page_load(loader)

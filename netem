@@ -7,7 +7,7 @@ function printHelp {
     else
         echo "netem - Web protocol analyzer which simulates a bottleneck link of your choise."
     fi
-    echo 
+    echo
     echo "Usage:"
     echo "  $1 [-q|--quic|-h2|--http2|-h1|--http1]"
     echo ""
@@ -42,6 +42,8 @@ function printHelp {
 
 netemFolder=$(realpath $(dirname $0))
 myUser=$USER
+timeout=60
+maxRetries=3
 caddy=$(which caddy)
 
 limitArgs=""
@@ -57,6 +59,10 @@ do
         # Debug mode does not initialize a virtual display
         -d|--debug)
             debugMode=true
+            shift # past argument=value
+            ;;
+        -g|--gui)
+            guiMode=true
             shift # past argument=value
             ;;
         -q|--quic)
@@ -85,6 +91,14 @@ do
             ;;
         --bandwidth-@(dl|ul)=*)
             limitArgs="$limitArgs $argument"
+            shift
+            ;;
+        --timeout=*)
+            timeout="${argument#*=}"
+            shift
+            ;;
+        --max-retries=*)
+            maxRetries="${argument#*=}"
             shift
             ;;
         *)
@@ -120,10 +134,12 @@ else
 fi
 
 # Run browser
-if [ "$debugMode" != true ]; then
-    sudo ip netns exec client-ns2 su $myUser -c "$netemFolder/browser-controller/starter.bash $webProtocol"
+if [ "$debugMode" = true ]; then
+    sudo ip netns exec client-ns2 su $myUser -c "$netemFolder/browser-controller/starter.bash $webProtocol $maxRetries $timeout --debug"
+elif [ "$guiMode" = true ]; then
+    sudo ip netns exec client-ns2 su $myUser -c "$netemFolder/browser-controller/starter.bash $webProtocol $maxRetries $timeout --with-gui"
 else
-    sudo ip netns exec client-ns2 su $myUser -c "$netemFolder/browser-controller/starter.bash --with-gui $webProtocol"
+    sudo ip netns exec client-ns2 su $myUser -c "$netemFolder/browser-controller/starter.bash $webProtocol $maxRetries $timeout"
 fi
 
 # ----------------- TEARDOWN
