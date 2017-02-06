@@ -75,4 +75,4 @@ myLoader.join()
 
 # Close virtual display
 if headless:
-    display.stottt
+    display.stop()
