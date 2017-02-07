@@ -92,6 +92,11 @@ if [ ! -f  $lockFile ]; then
     fi
 fi
 
+if [ "$initiator" = false ] && [ -n "$limitArgs" ]; then
+    echo "ERROR: Please exit the former simulation before creating a new one!"
+    echo ""
+    echo "In order to create another shell in your currently running simulaiton, just run $0 without any arguments."
+fi
 
 # ------------------ RUN
 
