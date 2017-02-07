@@ -30,7 +30,7 @@ Usage:
 To install some requirements on a Debian based system (Debian 8 "Jessie" / Ubuntu 16.04 or later):
 
 ```
-sudo apt-get install openvswitch-switch ethtool
+sudo apt-get install openvswitch-switch ethtool make
 ```
 
 ## Setup
