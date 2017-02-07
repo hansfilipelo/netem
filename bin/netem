@@ -97,11 +97,12 @@ if [ "$initiator" = false ] && [ -n "$limitArgs" ]; then
     echo "ERROR: Please exit the former simulation before creating a new one!"
     echo ""
     echo "In order to create another shell in your currently running simulaiton, just run $0 without any arguments."
+    exit 4
 fi
 
 # ------------------ RUN
 
-ip netns exec client-ns su $myUser -c "PS1=netem-prompt $userShell"
+ip netns exec client-ns sudo --user=$myUser /bin/bash --rcfile $netemFolder/share/netem/ps1-setup.bash
 
 # ----------------- TEARDOWN
 if [ "$initiator" = true ]; then

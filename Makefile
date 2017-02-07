@@ -12,6 +12,7 @@ install: bin/netem share/netem/configure.bash share/netem/iptables.bash share/ne
 	install -D $(CURDIR)/share/netem/limit-bottleneck.bash $(SHARE_DIR)/netem/limit-bottleneck.bash
 	install -D $(CURDIR)/share/netem/net-setup.bash $(SHARE_DIR)/netem/net-setup.bash
 	install -D $(CURDIR)/share/netem/teardown.bash $(SHARE_DIR)/netem/teardown.bash
+	install -D $(CURDIR)/share/netem/ps1-setup.bash $(SHARE_DIR)/netem/ps1-setup.bash
 
 uninstall:
 	rm -f $(BINARY_DIR)/netem
