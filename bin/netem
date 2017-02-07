@@ -12,7 +12,7 @@ function printHelp {
     echo "      $1 arguments"
     echo ""
     echo "--loss-rate-dl= / --loss-rate-ul="
-    echo "      Specify the loss rate on the down-link/up-link given in percent. 1-3% on down-link in rare cases but mostly below 1% by an order of magnitude. Up-link rarely sees loss in cellular networks. "
+    echo "      Specify the loss rate on the down-link/up-link given in percent.  "
     echo ""
     echo "--delay-dl= / --delay-ul"
     echo "      Specify the delay in ms on the down-link/up-link. "
@@ -21,10 +21,10 @@ function printHelp {
     echo "      Specify the standard deviation of the delay ms on the down-link/up-link. "
     echo ""
     echo "--loss-rate-dl= / --loss-rate-ul"
-    echo "      Specify the standard deviation of the delay ms on the down-link/up-link. "
+    echo "      Specify the loss rate on the down-link/up-link. "
     echo ""
     echo "--bandwidth-dl= / --bandwidth-ul"
-    echo "      Specify the standard deviation of the delay ms on the down-link/up-link. "
+    echo "      Specify the available bandwidth on the down-link/up-link. "
     exit 1
 }
 

@@ -3,10 +3,10 @@ Tool for spawning a shell with limited network capabilities.
 
 ```
 Usage:
-      ./bin/netem arguments
+      /usr/local/bin/netem arguments
 
 --loss-rate-dl= / --loss-rate-ul=
-      Specify the loss rate on the down-link/up-link given in percent. 1-3% on down-link in rare cases but mostly below 1% by an order of magnitude. Up-link rarely sees loss in cellular networks.
+      Specify the loss rate on the down-link/up-link given in percent.
 
 --delay-dl= / --delay-ul
       Specify the delay in ms on the down-link/up-link.
@@ -15,11 +15,10 @@ Usage:
       Specify the standard deviation of the delay ms on the down-link/up-link.
 
 --loss-rate-dl= / --loss-rate-ul
-      Specify the standard deviation of the delay ms on the down-link/up-link.
+      Specify the loss rate on the down-link/up-link.
 
 --bandwidth-dl= / --bandwidth-ul
-      Specify the standard deviation of the delay ms on the down-link/up-link.
-
+      Specify the available bandwidth on the down-link/up-link.
 ```
 
 ## Requirements
