@@ -1,6 +1,6 @@
 #!/bin/bash
 
-netemFolder="$(realpath $(dirname $0))/.."
+netemFolder="$(realpath $(dirname $0))/../.."
 
 #### INTERFACES ####
 

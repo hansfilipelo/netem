@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-netemFolder="$(realpath $(dirname $0))/.."
+netemFolder="$(realpath $(dirname $0))/../.."
 hostname=$1
 
 # Add namespace for the client

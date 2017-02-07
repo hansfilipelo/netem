@@ -12,11 +12,11 @@ function printHelp {
 }
 
 
-netemFolder="$(realpath $(dirname $0))/.."
+netemFolder="$(realpath $(dirname $0))/../.."
 
 # -------------------- Virtual network setup
 # Setup network namespaces and infrastructure
 echo "Setting up virtual network infrastructure. Will ask for password in order to gain root access."
-$netemFolder/share/net-setup.bash
-$netemFolder/share/iptables.bash
+$netemFolder/share/netem/net-setup.bash
+$netemFolder/share/netem/iptables.bash
 
