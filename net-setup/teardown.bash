@@ -15,12 +15,5 @@ ovs-vsctl del-br switch2
 ip netns delete server-ns
 ip netns delete client-ns2
 
-# Restore hosts-file
-if [ -f $netemFolder/hosts.tmp ]; then
-    cp $netemFolder/hosts.tmp /etc/hosts
-else
-    echo ""
-    echo "Can't find temporary hosts file! Please remove the entry for example.com from /etc/hosts manually!!"
-fi
 
 

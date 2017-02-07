@@ -133,6 +133,9 @@ else
     printHelp $0 "No protocol chosen! Please choose at least one of the protocols QUIC, HTTP2 or HTTP1."
 fi
 
+
+# Start Selenium
+sudo ip netns exec client-ns2 su $myUser -c "$netemFolder/browser-controller/selenium-bootstrap start"
 # Run browser
 if [ "$debugMode" = true ]; then
     sudo ip netns exec client-ns2 su $myUser -c "$netemFolder/browser-controller/starter.bash $webProtocol $maxRetries $timeout --debug"
@@ -145,4 +148,5 @@ fi
 # ----------------- TEARDOWN
 # Close web server of some sort
 sudo kill -QUIT $( cat /tmp/netem.server.pid )
-
+# Kill selenium
+sudo ip netns exec client-ns2 su $myUser -c "$netemFolder/browser-controller/selenium-bootstrap stop"

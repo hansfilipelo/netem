@@ -120,7 +120,6 @@ tls $certFolder/cert.pem $certFolder/key.pem {
 
 _EOF_
 
-
 # -------------------- Virtual network setup
 # Setup network namespaces and infrastructure
 echo "Setting up virtual network infrastructure. Will ask for password in order to gain root access."

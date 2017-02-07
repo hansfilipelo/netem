@@ -6,6 +6,7 @@ import os
 import pyvirtualdisplay
 import datetime
 import URLLoader
+import random
 
 headless = True
 debug = False
@@ -49,6 +50,8 @@ url_file = open(script_dir +
                 os.path.sep +
                 "urls.txt", "r")
 url_list = url_file.readlines()
+if not headless:
+    random.shuffle(url_list)
 base_url = hostname
 
 # Create log file for statistics

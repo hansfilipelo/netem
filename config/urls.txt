@@ -6,7 +6,6 @@ facebook.com
 4dsply.com
 4shared.com
 9gag.com
-abs-cbn.com
 accuweather.com
 adobe.com
 airbnb.com
@@ -17,7 +16,6 @@ allegro.pl
 ameblo.jp
 americanexpress.com
 aol.com
-aparat.com
 apple.com
 archive.org
 ask.com
@@ -229,7 +227,6 @@ stackoverflow.com
 steamcommunity.com
 steampowered.com
 subscene.com
-taboola.com
 taringa.net
 teepr.com
 telegram.org

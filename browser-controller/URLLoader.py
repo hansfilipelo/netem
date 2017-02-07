@@ -25,8 +25,10 @@ class URLLoader(threading.Thread):
 
         # Initialize Chromium/Opera
         self.chromium_options = selenium.webdriver.chrome.options.Options()
-        self.chromium_options.add_argument("--ignore-certificate-errors")
+        self.chromium_options.add_argument('--ignore-certificate-errors')
         self.chromium_options.add_argument('--disable-application-cache')
+        self.chromium_options.add_argument('--host-resolver-rules=MAP * 192.168.100.1, EXCLUDE localhost')
+        self.chromium_options.binary_location = '/usr/bin/opera'
         if use_quic:
             self.chromium_options.add_argument("--origin-to-force-quic-on=" +
                                                base_url +
@@ -40,11 +42,15 @@ class URLLoader(threading.Thread):
     def reset_driver(self):
         if self.driver:
             try:
+                self.driver.close()
                 self.driver.quit()
             except Exception as e:
                 print("Can't close non-working driver:")
                 print(type(e).__name__ + str(e))
-        self.driver = selenium.webdriver.Chrome(chrome_options=self.chromium_options)
+        self.driver = selenium.webdriver.Remote(
+            desired_capabilities=self.chromium_options.to_capabilities(),
+            command_executor="http://127.0.0.1:4444/wd/hub"
+        )
         self.driver.implicitly_wait(max(self.timeout - 10, 10))
         # Does not work in S2L,
         self.driver.set_page_load_timeout(self.timeout)

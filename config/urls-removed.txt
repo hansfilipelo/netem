@@ -4,6 +4,7 @@
 39.net
 4chan.org
 ablogica.com
+abs-cbn.com
 adexchangeprediction.com
 adf.ly
 adnetworkperformance.com
@@ -18,6 +19,7 @@ amazon.es
 amazon.fr
 amazon.in
 amazon.it
+aparat.com
 askcom.me
 babytree.com
 baidu.com
@@ -175,6 +177,7 @@ sogou.com
 soundcloud.com
 speedtest.net
 spotscenered.info
+taboola.com
 taleo.net
 taobao.com
 target.com
