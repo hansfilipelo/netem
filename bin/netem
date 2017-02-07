@@ -21,10 +21,10 @@ function printHelp {
     echo "      Specify the standard deviation of the delay ms on the down-link/up-link. "
     echo ""
     echo "--loss-rate-dl= / --loss-rate-ul"
-    echo "      Specify the tandard deviation of the delay ms on the down-link/up-link. "
+    echo "      Specify the standard deviation of the delay ms on the down-link/up-link. "
     echo ""
     echo "--bandwidth-dl= / --bandwidth-ul"
-    echo "      Specify the tandard deviation of the delay ms on the down-link/up-link. "
+    echo "      Specify the standard deviation of the delay ms on the down-link/up-link. "
     exit 1
 }
 
@@ -34,8 +34,10 @@ fi
 
 netemFolder="$(realpath $(dirname $0))../"
 myUser=$(logname)
-
+lockFile=/tmp/netem.lock
+initiator=false
 limitArgs=""
+
 
 # Set extblog extension in bash in order for case-switch to work (disabled when executing script)
 shopt -s extglob
@@ -66,23 +68,38 @@ do
     esac
 done
 
+# ----------------- SETUP
 
-# Setup link limits
-$netemFolder/share/configure.bash
-if [ $? != 0 ]; then
-    echo "ERROR: Failed to setup virtual network!"
-    exit 3
+if [ ! -f  $lockFile ]; then
+    # If initiator we need to have gotten some link-limits
+    if [ -z $limitArgs ]; then
+        printHelp $0 "You havn't set any link limits!"
+    fi
+
+    # Make sure we can run netem again to get more shells
+    initiator=true
+    touch $lockFile
+    # Setup link limits
+    $netemFolder/share/netem/configure.bash
+    if [ $? != 0 ]; then
+        echo "ERROR: Failed to setup virtual network!"
+        exit 3
+    fi
+    $netemFolder/share/netem/limit-bottleneck.bash $limitArgs
+    if [ $? != 0 ]; then
+        echo "ERROR: Failed to limit network links!"
+        exit 3
+    fi
 fi
-$netemFolder/share/limit-bottleneck.bash $limitArgs
-if [ $? != 0 ]; then
-    echo "ERROR: Failed to limit network links!"
-    exit 3
-fi
+
 
 # ------------------ RUN
 
 ip netns exec client-ns su $myUser -c "bash"
 
 # ----------------- TEARDOWN
-$netemFolder/share/teardown.bash
+if [ "$initiator" = true ]; then
+    $netemFolder/share/netem/teardown.bash
+    rm $lockFile
+fi
 

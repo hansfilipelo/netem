@@ -3,7 +3,7 @@ Tool for spawning a shell with limited network capabilities.
 
 ```
 Usage:
-      netem arguments
+      ./bin/netem arguments
 
 --loss-rate-dl= / --loss-rate-ul=
       Specify the loss rate on the down-link/up-link given in percent. 1-3% on down-link in rare cases but mostly below 1% by an order of magnitude. Up-link rarely sees loss in cellular networks.
@@ -15,10 +15,11 @@ Usage:
       Specify the standard deviation of the delay ms on the down-link/up-link.
 
 --loss-rate-dl= / --loss-rate-ul
-      Specify the tandard deviation of the delay ms on the down-link/up-link.
+      Specify the standard deviation of the delay ms on the down-link/up-link.
 
 --bandwidth-dl= / --bandwidth-ul
-      Specify the tandard deviation of the delay ms on the down-link/up-link.
+      Specify the standard deviation of the delay ms on the down-link/up-link.
+
 ```
 
 ## Requirements
@@ -28,7 +29,7 @@ Usage:
 To install some requirements on a Debian based system (Debian 8 "Jessie" / Ubuntu 16.04 or later):
 
 ```
-sudo apt-get install openvswitch-switch virtualenv ethtool
+sudo apt-get install openvswitch-switch ethtool
 ```
 
 ## Setup

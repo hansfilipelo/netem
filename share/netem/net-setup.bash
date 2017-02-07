@@ -4,8 +4,7 @@ set -e
 netemFolder="$(realpath $(dirname $0))/.."
 hostname=$1
 
-# Add two namespaces for server and client
-ip netns add server-ns
+# Add namespace for the client
 ip netns add client-ns
 
 # Add three virtual links with two interfaces each
@@ -39,7 +38,7 @@ ifconfig veth4 up
 
 # Set server ip
 ifconfig veth0 192.168.100.1
-# Set client IP
+# Set client ip
 ip netns exec client-ns ifconfig veth5 192.168.100.2
 ip netns exec client-ns ifconfig lo 127.0.0.1
 ip netns exec client-ns ifconfig lo 127.0.1.1

@@ -153,9 +153,9 @@ eval "$tcCommandDelayLoss"
 
 
 # Enforce MTU sized packets only ---------------------------
-ip netns exec server-ns ethtool --offload veth0 gso off
-ip netns exec server-ns ethtool --offload veth0 tso off
-ip netns exec server-ns ethtool --offload veth0 gro off
+ethtool --offload veth0 gso off
+ethtool --offload veth0 tso off
+ethtool --offload veth0 gro off
 
 ethtool --offload veth2 gso off
 ethtool --offload veth2 tso off
@@ -165,7 +165,7 @@ ethtool --offload veth3 gso off
 ethtool --offload veth3 tso off
 ethtool --offload veth3 gro off
 
-ip netns exec client-ns2 ethtool --offload veth5 gso off
-ip netns exec client-ns2 ethtool --offload veth5 tso off
-ip netns exec client-ns2 ethtool --offload veth5 gro off
+ip netns exec client-ns ethtool --offload veth5 gso off
+ip netns exec client-ns ethtool --offload veth5 tso off
+ip netns exec client-ns ethtool --offload veth5 gro off
 

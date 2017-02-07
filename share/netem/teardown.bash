@@ -7,9 +7,6 @@ netemFolder="$(realpath $(dirname $0))/.."
 external=$(route | grep default | awk '{print $8}')
 internal=veth0
 
-external_IP=$(hostname -I | awk '{print $1}')
-internal_IP=192.168.100.1
-
 # --------------------------------
 
 # Remove the NICs
@@ -21,8 +18,7 @@ ip link del veth4
 ovs-vsctl del-br switch1
 ovs-vsctl del-br switch2
 
-# Delete namespaces
-ip netns delete server-ns
+# Delete namespace
 ip netns delete client-ns
 
 # --------------------------
