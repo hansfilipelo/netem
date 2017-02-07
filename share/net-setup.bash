@@ -1,12 +1,12 @@
 #!/bin/bash
 set -e
 
-netemFolder=$(realpath $(dirname $0))/..
+netemFolder="$(realpath $(dirname $0))/.."
 hostname=$1
 
 # Add two namespaces for server and client
 ip netns add server-ns
-ip netns add client-ns2
+ip netns add client-ns
 
 # Add three virtual links with two interfaces each
 # server -> switch 1
@@ -21,9 +21,9 @@ ovs-vsctl add-br switch1
 ovs-vsctl add-br switch2
 
 # Attach server interface to server ns
-ip link set veth0 netns server-ns
+ip link set veth0
 # Attach client interface(s)
-ip link set veth5 netns client-ns2
+ip link set veth5 netns client-ns
 
 # Attach interfaces to switches
 ovs-vsctl add-port switch1 veth1
@@ -38,11 +38,11 @@ ifconfig veth3 up
 ifconfig veth4 up
 
 # Set server ip
-ip netns exec server-ns ifconfig veth0 192.168.100.1
+ifconfig veth0 192.168.100.1
 # Set client IP
-ip netns exec client-ns2 ifconfig veth5 192.168.100.2
-ip netns exec client-ns2 ifconfig lo 127.0.0.1
-ip netns exec client-ns2 ifconfig lo 127.0.1.1
+ip netns exec client-ns ifconfig veth5 192.168.100.2
+ip netns exec client-ns ifconfig lo 127.0.0.1
+ip netns exec client-ns ifconfig lo 127.0.1.1
 
 # -----------------------------
 

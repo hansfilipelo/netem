@@ -1,6 +1,0 @@
-ssl on;
-gzip on;
-expires 1h;
-add_header Pragma public;
-add_header Cache-Control "public";
-
