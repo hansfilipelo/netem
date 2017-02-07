@@ -32,8 +32,9 @@ if [ "$USER" != "root" ]; then
     printHelp $0 "Must be run as root!"
 fi
 
-netemFolder="$(realpath $(dirname $0))../"
+netemFolder="$(realpath $(dirname $0))/.."
 myUser=$(logname)
+userShell=$(getent passwd $myUser | cut -d: -f7)
 lockFile=/tmp/netem.lock
 initiator=false
 limitArgs=""
@@ -72,7 +73,7 @@ done
 
 if [ ! -f  $lockFile ]; then
     # If initiator we need to have gotten some link-limits
-    if [ -z $limitArgs ]; then
+    if [ -z "$limitArgs" ]; then
         printHelp $0 "You havn't set any link limits!"
     fi
 
@@ -100,7 +101,7 @@ fi
 
 # ------------------ RUN
 
-ip netns exec client-ns su $myUser -c "bash"
+ip netns exec client-ns su $myUser -c "PS1=netem-prompt $userShell"
 
 # ----------------- TEARDOWN
 if [ "$initiator" = true ]; then

@@ -40,6 +40,7 @@ ifconfig veth4 up
 ifconfig veth0 192.168.100.1
 # Set client ip
 ip netns exec client-ns ifconfig veth5 192.168.100.2
+ip netns exec client-ns route add default gw 192.168.100.1
 ip netns exec client-ns ifconfig lo 127.0.0.1
 ip netns exec client-ns ifconfig lo 127.0.1.1
 
