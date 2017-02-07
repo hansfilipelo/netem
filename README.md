@@ -1,9 +1,11 @@
 # netem
 Tool for spawning a shell with limited network capabilities.
 
+![Netem setup](doc/setup.png?raw=true)
+
 ```
 Usage:
-      /usr/local/bin/netem arguments
+      netem arguments
 
 --loss-rate-dl= / --loss-rate-ul=
       Specify the loss rate on the down-link/up-link given in percent.
