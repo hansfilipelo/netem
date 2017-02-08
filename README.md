@@ -10,16 +10,16 @@ Usage:
 --loss-rate-dl= / --loss-rate-ul=
       Specify the loss rate on the down-link/up-link given in percent.
 
---delay-dl= / --delay-ul
+--delay-dl= / --delay-ul=
       Specify the average delay in ms on the down-link/up-link.
 
---delay-deviation-dl= / --delay-deviation-ul
+--delay-deviation-dl= / --delay-deviation-ul=
       Specify the standard deviation of the delay as ms on the down-link/up-link.
 
---loss-rate-dl= / --loss-rate-ul
+--loss-rate-dl= / --loss-rate-ul=
       Specify the loss rate on the down-link/up-link.
 
---bandwidth-dl= / --bandwidth-ul
+--bandwidth-dl= / --bandwidth-ul=
       Specify the available bandwidth on the down-link/up-link.
 ```
 
