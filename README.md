@@ -8,9 +8,6 @@ Tool for spawning a shell with limited network capabilities.
 Usage:
       netem arguments
 
---loss-rate-dl= / --loss-rate-ul=
-      Specify the loss rate on the down-link/up-link given in percent.
-
 --delay-dl= / --delay-ul=
       Specify the average delay in ms on the down-link/up-link.
 
