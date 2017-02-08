@@ -102,7 +102,7 @@ fi
 
 # ------------------ RUN
 
-ip netns exec client-ns sudo --user=$myUser /bin/bash --rcfile $netemFolder/share/netem/ps1-setup.bash
+ip netns exec netem-ns sudo --user=$myUser /bin/bash --rcfile $netemFolder/share/netem/ps1-setup.bash
 
 # ----------------- TEARDOWN
 if [ "$initiator" = true ]; then

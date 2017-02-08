@@ -1,25 +1,25 @@
-#!/bin/bash
+#netem-!/bin/bash
 
 netemFolder="$(realpath $(dirname $0))/../.."
 
 #### INTERFACES ####
 
 external=$(route | grep default | awk '{print $8}')
-internal=veth0
+internal=netem-veth0
 
 # --------------------------------
 
 # Remove the NICs
-ip link del veth1
-ip link del veth2
-ip link del veth4
+ip link del netem-veth1
+ip link del netem-veth2
+ip link del netem-veth4
 
 # Destroy switches
 ovs-vsctl del-br switch1
 ovs-vsctl del-br switch2
 
 # Delete namespace
-ip netns delete client-ns
+ip netns delete netem-ns
 
 # --------------------------
 # Destroy iptables rules

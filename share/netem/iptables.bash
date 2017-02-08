@@ -3,7 +3,7 @@
 #### INTERFACES ####
 
 external=$(route | grep default | awk '{print $8}')
-internal=veth0
+internal=netem-veth0
 
 # --------------------------
 # Set up NAT so client can access internet

@@ -53,7 +53,7 @@ function restoreQdiscs () {
 }
 
 # Start by restoring qdiscs
-restoreQdiscs "veth2" "veth3"
+restoreQdiscs "netem-veth2" "netem-veth3"
 
 # Buffer size -------------------
 bufferMultiplyer=15000
@@ -71,9 +71,9 @@ nrQdiscs=0
 # Bandwidth
 if [ -n "$bandwidthDown" ]; then
     if [ $nrQdiscs -gt 0 ]; then
-        tc -s qdisc add dev veth2 parent $nrQdiscs:0 handle $(($nrQdiscs + 1)): netem rate "$bandwidthDown"Mbit limit $bufferSize
+        tc -s qdisc add dev netem-veth2 parent $nrQdiscs:0 handle $(($nrQdiscs + 1)): netem rate "$bandwidthDown"Mbit limit $bufferSize
     else
-        tc -s qdisc replace dev veth2 root handle 1:0 netem rate "$bandwidthDown"Mbit limit $bufferSize limit $bufferSize
+        tc -s qdisc replace dev netem-veth2 root handle 1:0 netem rate "$bandwidthDown"Mbit limit $bufferSize limit $bufferSize
     fi
     nrQdiscs=$(($nrQdiscs + 1))
 fi
@@ -82,9 +82,9 @@ fi
 # Delay and loss
 tcCommandDelayLoss=""
 if [ $nrQdiscs -gt 0 ]; then
-    tcCommandDelayLoss="tc -s qdisc add dev veth2 parent $nrQdiscs:0 handle $(($nrQdiscs + 1)):0 netem limit $bufferSize"
+    tcCommandDelayLoss="tc -s qdisc add dev netem-veth2 parent $nrQdiscs:0 handle $(($nrQdiscs + 1)):0 netem limit $bufferSize"
 else
-    tcCommandDelayLoss="tc -s qdisc replace dev veth2 root handle 1:0 netem limit $bufferSize"
+    tcCommandDelayLoss="tc -s qdisc replace dev netem-veth2 root handle 1:0 netem limit $bufferSize"
 fi
 
 
@@ -97,7 +97,7 @@ elif [ -n "$meanDelayDown" ]; then
     nrQdiscs=$(($nrQdiscs + 1))
 elif [ -n "$delayDeviationDown" ] && [ -z "$meanDelayDown"]; then
     echo "ERROR: You can't set a delay deviation without setting a delay!!"
-    restoreQdiscs veth2
+    restoreQdiscs netem-veth2
     exit 11
 fi
 
@@ -114,9 +114,9 @@ nrQdiscs=0
 # Bandwidth
 if [ -n "$bandwidthUp" ]; then
     if [ $nrQdiscs -gt 0 ]; then
-        tc -s qdisc add dev veth3 parent $nrQdiscs:0 handle $(($nrQdiscs + 1)): netem rate "$bandwidthUp"Mbit limit $bufferSize
+        tc -s qdisc add dev netem-veth3 parent $nrQdiscs:0 handle $(($nrQdiscs + 1)): netem rate "$bandwidthUp"Mbit limit $bufferSize
     else
-        tc -s qdisc replace dev veth3 root handle 1:0 netem rate "$bandwidthUp"Mbit limit $bufferSize limit $bufferSize
+        tc -s qdisc replace dev netem-veth3 root handle 1:0 netem rate "$bandwidthUp"Mbit limit $bufferSize limit $bufferSize
     fi
     nrQdiscs=$(($nrQdiscs + 1))
 fi
@@ -125,9 +125,9 @@ fi
 # Delay and loss
 tcCommandDelayLoss=""
 if [ $nrQdiscs -gt 0 ]; then
-    tcCommandDelayLoss="tc -s qdisc add dev veth3 parent $nrQdiscs:0 handle $(($nrQdiscs + 1)):0 netem limit $bufferSize"
+    tcCommandDelayLoss="tc -s qdisc add dev netem-veth3 parent $nrQdiscs:0 handle $(($nrQdiscs + 1)):0 netem limit $bufferSize"
 else
-    tcCommandDelayLoss="tc -s qdisc replace dev veth3 root handle 1:0 netem limit $bufferSize"
+    tcCommandDelayLoss="tc -s qdisc replace dev netem-veth3 root handle 1:0 netem limit $bufferSize"
 fi
 
 
@@ -140,7 +140,7 @@ elif [ -n "$meanDelayUp" ]; then
     nrQdiscs=$(($nrQdiscs + 1))
 elif [ -n "$delayDeviationUp" ] && [ -z "$meanDelayUp"]; then
     echo "ERROR: You can't set a delay deviation without setting a delay!!"
-    restoreQdiscs veth3
+    restoreQdiscs netem-veth3
     exit 11
 fi
 
@@ -153,19 +153,19 @@ eval "$tcCommandDelayLoss"
 
 
 # Enforce MTU sized packets only ---------------------------
-ethtool --offload veth0 gso off
-ethtool --offload veth0 tso off
-ethtool --offload veth0 gro off
+ethtool --offload netem-veth0 gso off
+ethtool --offload netem-veth0 tso off
+ethtool --offload netem-veth0 gro off
 
-ethtool --offload veth2 gso off
-ethtool --offload veth2 tso off
-ethtool --offload veth2 gro off
+ethtool --offload netem-veth2 gso off
+ethtool --offload netem-veth2 tso off
+ethtool --offload netem-veth2 gro off
 
-ethtool --offload veth3 gso off
-ethtool --offload veth3 tso off
-ethtool --offload veth3 gro off
+ethtool --offload netem-veth3 gso off
+ethtool --offload netem-veth3 tso off
+ethtool --offload netem-veth3 gro off
 
-ip netns exec client-ns ethtool --offload veth5 gso off
-ip netns exec client-ns ethtool --offload veth5 tso off
-ip netns exec client-ns ethtool --offload veth5 gro off
+ip netns exec netem-ns ethtool --offload netem-veth5 gso off
+ip netns exec netem-ns ethtool --offload netem-veth5 tso off
+ip netns exec netem-ns ethtool --offload netem-veth5 gro off
 
