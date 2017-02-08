@@ -3,6 +3,7 @@ Tool for spawning a shell with limited network capabilities.
 
 ![Netem setup](doc/setup.png?raw=true)
 
+
 ```
 Usage:
       netem arguments
@@ -21,6 +22,13 @@ Usage:
 
 --bandwidth-dl= / --bandwidth-ul=
       Specify the available bandwidth on the down-link/up-link.
+```
+
+**Example**
+
+```
+$ sudo netem --bandwidth-dl=0.5 --bandwidth-ul=0.2 --delay-dl=100 --delay-ul=100 --delay-deviation-ul=50 --delay-deviation-dl=50
+netem-prompt:/my-folder$ RUN_ANY_COMMAND
 ```
 
 ## Requirements
