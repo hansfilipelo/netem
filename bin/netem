@@ -30,7 +30,13 @@ if [ "$USER" != "root" ]; then
 fi
 
 netemFolder="$(realpath $(dirname $0))/.."
+
+# Run as the user that ran sudo, otherwise run as root if not a sudo-shell
 myUser=$SUDO_USER
+if [ -z "$myUser" ]; then
+    myUser=root
+fi
+
 userShell=$(getent passwd $myUser | cut -d: -f7)
 lockFile=/tmp/netem.lock
 initiator=false
