@@ -3,6 +3,47 @@ set -e
 
 netemFolder="$(realpath $(dirname $0))/../.."
 hostname=$1
+lockFile=/tmp/netem.lock
+myNetwork="192.168.100"
+externalIp=""
+internalIp=""
+. $netemFolder/share/netem/iputils.bash
+
+# Handle in-arguments -------------
+for inArg in "$@"
+do
+  case $inArg in
+    "--internal-ip="*)
+      internalIp="${inArg#*=}"
+      shift
+      ;;
+    "--external-ip="*)
+      externalIp="${inArg#*=}"
+      shift
+      ;;
+    "--network="*)
+      myNetwork="${inArg#*=}"
+      shift
+      ;;
+    *)
+      echo "$0 : Invalid argument $inArg."
+      shift
+      ;;
+  esac
+done
+
+if [ -z "$internalIp" ]
+then
+  internalIp="$(beginningOfIp $myNetwork).2"
+fi
+if [ -z "$externalIp" ]
+then
+  externalIp="$(beginningOfIp $myNetwork).1"
+fi
+
+echo "Netmask: $myNetwork/24" >> $lockFile
+echo "Internal IP: $internalIp" >> $lockFile
+echo "External IP: $externalIp" >> $lockFile
 
 # Add namespace for the client
 ip netns add netem-ns
@@ -37,12 +78,10 @@ ifconfig netem-veth3 up
 ifconfig netem-veth4 up
 
 # Set server ip
-ifconfig netem-veth0 192.168.100.1
+ifconfig netem-veth0 $externalIp
 # Set client ip
-ip netns exec netem-ns ifconfig netem-veth5 192.168.100.2
-ip netns exec netem-ns route add default gw 192.168.100.1
+ip netns exec netem-ns ifconfig netem-veth5 $internalIp
+ip netns exec netem-ns route add default gw $externalIp
 ip netns exec netem-ns ifconfig lo 127.0.0.1
 ip netns exec netem-ns ifconfig lo 127.0.1.1
-
-# -----------------------------
 

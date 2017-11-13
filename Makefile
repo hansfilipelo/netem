@@ -13,6 +13,7 @@ install: bin/netem share/netem/configure.bash share/netem/iptables.bash share/ne
 	install -D $(CURDIR)/share/netem/net-setup.bash $(SHARE_DIR)/net-setup.bash
 	install -D $(CURDIR)/share/netem/teardown.bash $(SHARE_DIR)/teardown.bash
 	install -D $(CURDIR)/share/netem/ps1-setup.bash $(SHARE_DIR)/ps1-setup.bash
+	install -D $(CURDIR)/share/netem/iputils.bash $(SHARE_DIR)/iputils.bash
 
 uninstall:
 	rm -f $(BINARY_DIR)/netem

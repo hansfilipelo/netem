@@ -22,6 +22,12 @@ function printHelp {
     echo ""
     echo "--bandwidth-dl= / --bandwidth-ul="
     echo "      Specify the available bandwidth on the down-link/up-link. "
+    echo ""
+    echo "--internal-ip="
+    echo "      Specify the IP address set within the virtual network namespace. Do not combine with --network but DO combine with --external-ip."
+    echo ""
+    echo "--external-ip="
+    echo "      Specify the IP address given to the interface within the default system namespace. Do not combine with --network but DO combine with --internal-ip."
     exit 1
 }
 
@@ -30,86 +36,119 @@ if [ "$USER" != "root" ]; then
 fi
 
 netemFolder="$(realpath $(dirname $0))/.."
+. $netemFolder/share/netem/iputils.bash
 
 # Run as the user that ran sudo, otherwise run as root if not a sudo-shell
 myUser=$SUDO_USER
 if [ -z "$myUser" ]; then
-    myUser=root
+  echo "Unable to drop priviliges. Run netem with sudo please!"
+  exit 1
 fi
 
 userShell=$(getent passwd $myUser | cut -d: -f7)
 lockFile=/tmp/netem.lock
 initiator=false
 limitArgs=""
-
+configArgs=""
+myNetwork="192.168.100.0"
+externalIp=""
+internalIp=""
 
 # Set extblog extension in bash in order for case-switch to work (disabled when executing script)
 shopt -s extglob
 # Handle in-arguments
 for argument in "$@"
 do
-    case $argument in
-        # Debug mode does not initialize a virtual display
-        --loss-rate-@(dl|ul)=*)
-            limitArgs="$limitArgs $argument"
-            shift
-            ;;
-        --delay-@(dl|ul)=*)
-            limitArgs="$limitArgs $argument"
-            shift
-            ;;
-        --delay-deviation-@(dl|ul)=*)
-            limitArgs="$limitArgs $argument"
-            shift
-            ;;
-        --bandwidth-@(dl|ul)=*)
-            limitArgs="$limitArgs $argument"
-            shift
-            ;;
-        *)
-            printHelp $0 "Invalid argument: $argument"
-            ;;
-    esac
+  case $argument in
+    # Debug mode does not initialize a virtual display
+    --loss-rate-@(dl|ul)=*)
+    limitArgs="$limitArgs $argument"
+    shift
+    ;;
+  --delay-@(dl|ul)=*)
+    limitArgs="$limitArgs $argument"
+    shift
+    ;;
+  --delay-deviation-@(dl|ul)=*)
+    limitArgs="$limitArgs $argument"
+    shift
+    ;;
+  --bandwidth-@(dl|ul)=*)
+    limitArgs="$limitArgs $argument"
+    shift
+    ;;
+  --internal-ip=*)
+    internalIp="${argument#*=}"
+    configArgs="$configArgs $argument"
+    shift
+    ;;
+  --external-ip=*)
+    externalIp="${argument#*=}"
+    configArgs="$configArgs $argument"
+    shift
+    ;;
+  *)
+    printHelp $0 "Invalid argument: $argument"
+    ;;
+esac
 done
 
+# Some IP address checking
+if [ -z "$internalIp" ] && [ -n "$externalIp" ]
+then
+  printHelp $0 "Please specify both client and server IP or none of them!"
+fi
+if [ -z "$externalIp" ] && [ -n "$internalIp" ]
+then
+  printHelp $0 "Please specify both client and server IP or none of them!"
+fi
+
+if [ -n "$internalIp" ] && [ -n "$externalIp" ]
+then
+  myNetwork=$(network $externalIp 24)
+  if [ "$myNetwork" != "$(network $internalIp 24)" ]
+  then
+    printHelp $0 "Internal and external IP of the network namespace are not set to the same network address!"
+  fi
+fi
+configArgs="$configArgs --network=$myNetwork"
+
 # ----------------- SETUP
-
 if [ ! -f  $lockFile ]; then
-    # If initiator we need to have gotten some link-limits
-    if [ -z "$limitArgs" ]; then
-        printHelp $0 "You havn't set any link limits!"
-    fi
-
-    # Make sure we can run netem again to get more shells
-    initiator=true
-    touch $lockFile
-    # Setup link limits
-    $netemFolder/share/netem/configure.bash
-    if [ $? != 0 ]; then
-        echo "ERROR: Failed to setup virtual network!"
-        exit 3
-    fi
-    $netemFolder/share/netem/limit-bottleneck.bash $limitArgs
-    if [ $? != 0 ]; then
-        echo "ERROR: Failed to limit network links!"
-        exit 3
-    fi
+  # Make sure we can run netem again to get more shells
+  initiator=true
+  touch $lockFile
+  echo "-------------------------" >> $lockFile
+  echo "Netem Info:" >> $lockFile
+  # Setup link limits
+  $netemFolder/share/netem/configure.bash $configArgs
+  if [ $? != 0 ]; then
+    echo "ERROR: Failed to setup virtual network!"
+    exit 3
+  fi
+  $netemFolder/share/netem/limit-bottleneck.bash $limitArgs
+  if [ $? != 0 ]; then
+    echo "ERROR: Failed to limit network links!"
+    exit 3
+  fi
 fi
 
 if [ "$initiator" = false ] && [ -n "$limitArgs" ]; then
-    echo "ERROR: Please exit the former simulation before creating a new one!"
-    echo ""
-    echo "In order to create another shell in your currently running simulaiton, just run $0 without any arguments."
-    exit 4
+  echo "ERROR: Please exit the former simulation before creating a new one!"
+  echo ""
+  echo "In order to create another shell in your currently running simulaiton, just run $0 without any arguments."
+  exit 4
 fi
 
+echo "-------------------------" >> $lockFile
 # ------------------ RUN
 
-ip netns exec netem-ns sudo --user=$myUser /bin/bash --rcfile $netemFolder/share/netem/ps1-setup.bash
+cat $lockFile
+ip netns exec netem-ns sudo -u $myUser /bin/bash --rcfile $netemFolder/share/netem/ps1-setup.bash
 
 # ----------------- TEARDOWN
 if [ "$initiator" = true ]; then
-    $netemFolder/share/netem/teardown.bash
-    rm $lockFile
+  $netemFolder/share/netem/teardown.bash $configArgs
+  rm $lockFile
 fi
 
