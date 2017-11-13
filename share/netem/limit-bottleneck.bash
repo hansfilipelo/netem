@@ -4,6 +4,7 @@ set -e
 lockFile=/tmp/netem.lock
 
 # Handle in-arguments -------------
+
 for inArg in "$@"
 do
   case $inArg in
@@ -50,11 +51,6 @@ echo "Bandwidth: $bandwidthDown / $bandwidthUp Mbit/s" >> $lockFile
 echo "Delay: $meanDelayDown / $meanDelayUp ms" >> $lockFile
 echo "Delay deviation: $delayDeviationdown / $delayDeviationUp ms" >> $lockFile
 echo "Loss rate: $lossRateDown / $lossRateUp \%" >> $lockFile
-
-if [ -z "$@" ]
-then
-  exit 0
-fi
 
 # Used for restoring qdiscs
 function restoreQdiscs () {
