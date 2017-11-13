@@ -24,10 +24,13 @@ function printHelp {
     echo "      Specify the available bandwidth on the down-link/up-link. "
     echo ""
     echo "--internal-ip="
-    echo "      Specify the IP address set within the virtual network namespace. Do not combine with --network but DO combine with --external-ip."
+    echo "      Specify the IP address set within the virtual network namespace. Do not combine with --network but DO combine with --gateway-ip."
     echo ""
-    echo "--external-ip="
+    echo "--gateway-ip="
     echo "      Specify the IP address given to the interface within the default system namespace. Do not combine with --network but DO combine with --internal-ip."
+    echo ""
+    echo "--netmask-bits="
+    echo "      Specify the IP netmask bits. 8, 16 and 24 is valid options."
     exit 1
 }
 
@@ -53,6 +56,7 @@ configArgs=""
 myNetwork="192.168.100.0"
 externalIp=""
 internalIp=""
+netmaskBits="24"
 
 # Set extblog extension in bash in order for case-switch to work (disabled when executing script)
 shopt -s extglob
@@ -82,8 +86,12 @@ do
     configArgs="$configArgs $argument"
     shift
     ;;
-  --external-ip=*)
+  --gateway-ip=*)
     externalIp="${argument#*=}"
+    configArgs="$configArgs $argument"
+    shift
+    ;;
+  --netmask-bits=*)
     configArgs="$configArgs $argument"
     shift
     ;;
@@ -105,13 +113,14 @@ fi
 
 if [ -n "$internalIp" ] && [ -n "$externalIp" ]
 then
-  myNetwork=$(network $externalIp 24)
-  if [ "$myNetwork" != "$(network $internalIp 24)" ]
+  myNetwork=$(network $externalIp $netmaskBits)
+  if [ "$myNetwork" != "$(network $internalIp $netmaskBits)" ]
   then
     printHelp $0 "Internal and external IP of the network namespace are not set to the same network address!"
   fi
 fi
 configArgs="$configArgs --network=$myNetwork"
+configArgs="$configArgs --netmask-bits=$netmaskBits"
 
 # ----------------- SETUP
 if [ ! -f  $lockFile ]; then

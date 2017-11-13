@@ -42,5 +42,61 @@ network()
 beginningOfIp()
 {
   thisNetwork=$1
-  echo $thisNetwork | sed 's/\(.*\)\..*/\1/'
+  netmaskBits=$2
+  outputString=$thisNetwork
+  loopstop=1
+  if [ "$netmaskBits" = "24" ]; then
+    loopstop=1
+    appendString=""
+  elif [ "$netmaskBits" = "16" ]; then
+    loopstop=2
+    appendString=".0"
+  elif [ "$netmaskBits" = "8" ]; then
+    loopstop=3
+    appendString=".0.0"
+  fi
+
+  i=0
+  while [ $i -lt $loopstop ]; do
+    outputString=$(echo $outputString | sed 's/\(.*\)\..*/\1/')
+    i=$(($i+1))
+  done
+  echo "$outputString$appendString"
+}
+
+broadcastFromNetworkAndBits()
+{
+  thisNetwork=$1
+  netmaskBits=$2
+  outputString=$thisNetwork
+  loopstop=1
+  if [ "$netmaskBits" = "24" ]; then
+    loopstop=1
+    appendString=".255"
+  elif [ "$netmaskBits" = "16" ]; then
+    loopstop=2
+    appendString=".255.255"
+  elif [ "$netmaskBits" = "8" ]; then
+    loopstop=3
+    appendString=".255.255.255"
+  fi
+
+  i=0
+  while [ $i -lt $loopstop ]; do
+    outputString=$(echo $outputString | sed 's/\(.*\)\..*/\1/')
+    i=$(($i+1))
+  done
+  echo "$outputString$appendString"
+}
+
+netmaskFromBits()
+{
+  netmaskBits=$1
+  if [ "$netmaskBits" = "24" ]; then
+    echo "255.255.255.0"
+  elif [ "$netmaskBits" = "16" ]; then
+    echo "255.255.0.0"
+  elif [ "$netmaskBits" = "8" ]; then
+    echo "255.0.0.0"
+  fi
 }

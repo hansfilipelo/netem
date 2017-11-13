@@ -5,6 +5,7 @@ netemFolder="$(realpath $(dirname $0))/../.."
 hostname=$1
 lockFile=/tmp/netem.lock
 myNetwork="192.168.100"
+netmaskBits="24"
 externalIp=""
 internalIp=""
 . $netemFolder/share/netem/iputils.bash
@@ -17,12 +18,16 @@ do
       internalIp="${inArg#*=}"
       shift
       ;;
-    "--external-ip="*)
+    "--gateway-ip="*)
       externalIp="${inArg#*=}"
       shift
       ;;
     "--network="*)
       myNetwork="${inArg#*=}"
+      shift
+      ;;
+    "--netmask-bits="*)
+      netmaskBits="${inArg#*=}"
       shift
       ;;
     *)
@@ -34,16 +39,19 @@ done
 
 if [ -z "$internalIp" ]
 then
-  internalIp="$(beginningOfIp $myNetwork).2"
+  internalIp="$(beginningOfIp $myNetwork $netmaskBits).2"
 fi
 if [ -z "$externalIp" ]
 then
-  externalIp="$(beginningOfIp $myNetwork).1"
+  externalIp="$(beginningOfIp $myNetwork $netmaskBits).1"
 fi
 
-echo "Netmask: $myNetwork/24" >> $lockFile
+broadcastAddress=$(broadcastFromNetworkAndBits $myNetwork $netmaskBits)
+netmaskIs=$(netmaskFromBits $netmaskBits)
+
+echo "Network: $myNetwork/$netmaskBits" >> $lockFile
 echo "Internal IP: $internalIp" >> $lockFile
-echo "External IP: $externalIp" >> $lockFile
+echo "Gateway IP: $externalIp" >> $lockFile
 
 # Add namespace for the internal
 ip netns add netem-ns
@@ -78,9 +86,9 @@ ifconfig netem-veth3 up
 ifconfig netem-veth4 up
 
 # Set server ip
-ifconfig netem-veth0 $externalIp
+ifconfig netem-veth0 $externalIp netmask $netmaskIs
 # Set internal ip
-ip netns exec netem-ns ifconfig netem-veth5 $internalIp
+ip netns exec netem-ns ifconfig netem-veth5 $internalIp netmask $netmaskIs
 ip netns exec netem-ns route add default gw $externalIp
 ip netns exec netem-ns ifconfig lo 127.0.0.1
 ip netns exec netem-ns ifconfig lo 127.0.1.1

@@ -2,6 +2,7 @@
 network="192.168.100.0"
 externalIp=""
 internalIp=""
+netmaskBits="24"
 
 # Handle in-arguments -------------
 for inArg in "$@"
@@ -11,12 +12,16 @@ do
       internalIp="${inArg#*=}"
       shift
       ;;
-    "--external-ip="*)
+    "--gateway-ip="*)
       externalIp="${inArg#*=}"
       shift
       ;;
     "--network="*)
       network="${inArg#*=}"
+      shift
+      ;;
+    "--netmask-bits="*)
+      netmaskBits="${inArg#*=}"
       shift
       ;;
     *)
@@ -49,7 +54,7 @@ iptables -A FORWARD -i $internalIf -o $externalIf -j ACCEPT
 iptables -t nat -A POSTROUTING -o $externalIf -j MASQUERADE
 
 # MASQUERADE on packages from internalIf-to-internalIf, nessecary for NAT Loopback
-iptables -A POSTROUTING -t nat -s "$network"/24 -d "$network"/24 -p tcp -j MASQUERADE
+iptables -A POSTROUTING -t nat -s "$network"/$netmaskBits -d "$network"/$netmaskBits -p tcp -j MASQUERADE
 
 # Enable routing.
 sysctl net.ipv4.ip_forward=1 >> /dev/null
