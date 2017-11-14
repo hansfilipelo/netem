@@ -19,6 +19,11 @@ Usage:
 
 --bandwidth-dl= / --bandwidth-ul=
       Specify the available bandwidth on the down-link/up-link.
+--internal-ip
+      Specify the IP address set within the virtual network namespace. Do not combine with --network but DO combine with --external-ip.
+
+--external-ip=
+      Specify the IP address given to the interface within the default system namespace. Do not combine with --network but DO combine with --internal-ip.
 ```
 
 **Example**
